@@ -1,0 +1,12 @@
+body{
+  background-color: rgba(19, 5, 122, 0.931);
+  color: white;
+  font-family: fantasy;
+}
+
+h1 {
+  margin-left: 25px;
+}
+#hot-list-image {
+  height: 25vh;
+}
