@@ -7,6 +7,19 @@ body{
 h1 {
   margin-left: 25px;
 }
-#hot-list-image {
-  height: 25vh;
+
+.image-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  margin: 0;
+  padding: 0;
+}
+
+#image-list-grid {
+  padding: 0;
+  margin: 0;
+}
+
+#image-list-container{
+  padding: 0;
 }
