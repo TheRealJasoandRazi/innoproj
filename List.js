@@ -4,6 +4,8 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import { Link } from 'react-router-dom';
+import IconButton from '@mui/material/IconButton';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 const itemData = [
   {
@@ -23,13 +25,13 @@ const itemData = [
     title: 'Bike',
     author: '@southside_customs',
     desc: 'testing',
-  },
+  }
 ];
 
 function List() {
   return (
-    <Container maxWidth="xl">
-      <ImageList cols={3} style={{ width: '100%' }}>
+    <Container id="image-list-container" name="image-list-container">
+      <ImageList class ="image-list" cols={3}>
         {itemData.map((item) => (
             <ImageListItem key={item.img} id="hot-list-item" >
               <img
@@ -43,6 +45,11 @@ function List() {
                 title={item.title}
                 subtitle={item.author}
                 id="hot-list-caption"
+                actionIcon={
+                    <IconButton sx={{ color: 'rgba(255, 255, 255, 0.54)' }}>
+                      <MonetizationOnIcon />
+                    </IconButton>
+                }
               />
             </ImageListItem>
         ))}
@@ -52,4 +59,3 @@ function List() {
 }
 
 export default List;
-
