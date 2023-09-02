@@ -78,7 +78,7 @@ const StyledMenu = styled((props) => (
 }));
 
 const NavBar = () => {
-  let cartCount = 0;
+  let cartCount = 10;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -155,7 +155,7 @@ const NavBar = () => {
               onClose={handleClose}
             >
               <a
-                href="/Transactions"
+                href="/transactions"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <MenuItem onClick={handleClose} disableRipple>
