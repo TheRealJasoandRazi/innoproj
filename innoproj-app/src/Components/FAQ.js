@@ -9,7 +9,7 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import darkTheme from "./DarkTheme";
+import darkTheme from "../Themes/DarkTheme";
 
 const FAQpage = () => {
   return (

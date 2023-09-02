@@ -20,7 +20,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { createTheme } from "@mui/material/styles";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import { useCart } from "./CartContext";
+import { useCart } from "../Contexts/CartContext";
 
 const NavBar = () => {
   // Create a custom theme

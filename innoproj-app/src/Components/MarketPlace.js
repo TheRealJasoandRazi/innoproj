@@ -14,7 +14,7 @@ import {
   ThemeProvider,
   CssBaseline,
 } from "@mui/material";
-import darkTheme from "./DarkTheme";
+import darkTheme from "../Themes/DarkTheme";
 
 const MarketPlace = () => {
   return (

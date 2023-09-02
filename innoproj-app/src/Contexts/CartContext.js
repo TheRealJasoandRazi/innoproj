@@ -9,7 +9,7 @@ export function useCart() {
 /**
  * items array - [
  *  {
- *   name - name of the item|product,
+ *   item - name of the item|product, *In the first assignment (img, title)*
  *   price - unit price of the product
  *   qty - number of units
  * }

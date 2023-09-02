@@ -4,7 +4,7 @@ import {
   CssBaseline,
   ThemeProvider,
 } from "@mui/material";
-import darkTheme from "./DarkTheme";
+import darkTheme from "../Themes/DarkTheme";
 
 const WishList = () => {
   return (

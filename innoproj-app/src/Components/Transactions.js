@@ -13,7 +13,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import darkTheme from "./DarkTheme";
+import darkTheme from "../Themes/DarkTheme";
 import DetailsIcon from "@mui/icons-material/Details";
 
 // Define the Transactions component

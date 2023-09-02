@@ -1,9 +1,9 @@
-import NavBar from "./Navbar";
-import Home from "./Home";
-import MarketPlace from "./MarketPlace";
-import AssetsPage from "./AssetsPage";
-import Transactions from "./Transactions";
-import FAQpage from "./FAQ";
+import NavBar from "./Components/Navbar";
+import Home from "./Components/Home";
+import MarketPlace from "./Components/MarketPlace";
+import AssetsPage from "./Components/AssetsPage";
+import Transactions from "./Components/Transactions";
+import FAQpage from "./Components/FAQ";
 import { Route, Routes } from "react-router-dom";
 
 function App() {

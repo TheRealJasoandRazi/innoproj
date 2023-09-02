@@ -15,7 +15,7 @@ import {
 import QuizIcon from "@mui/icons-material/Quiz";
 import { useNavigate } from "react-router-dom";
 import WatchList from "./WatchList";
-import darkTheme from "./DarkTheme";
+import darkTheme from "../Themes/DarkTheme";
 
 const Home = () => {
   let userBalance = 100;
