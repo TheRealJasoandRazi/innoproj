@@ -11,7 +11,7 @@ export function useCart() {
  *  {
  *   name - name of the item|product,
  *   price - unit price of the product
- *   qty - number of units 
+ *   qty - number of units
  * }
  * ....
  * ]
@@ -28,7 +28,8 @@ export function CartProvider({ children }) {
   const addItemToCart = (item) => {
     setCart((prevCart) => ({
       ...prevCart,
-      quantity: prevCart.quantity + 1,
+      quantity: prevCart.quantity + item.qty,
+      totalPrice: prevCart.totalPrice + item.price,
       items: [...prevCart.items, item],
     }));
   };
@@ -40,7 +41,8 @@ export function CartProvider({ children }) {
 
     setCart((prevCart) => ({
       ...prevCart,
-      quantity: prevCart.quantity - 1,
+      quantity: prevCart.quantity - prevCart.items[index].qty,
+      totalPrice: prevCart.totalPrice - prevCart.items[index].price,
       items: updatedItems,
     }));
   };
