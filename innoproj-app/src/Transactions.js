@@ -85,7 +85,7 @@ const Transactions = () => {
                 size="small"
                 aria-label="transaction history table"
               >
-                <TableHead>
+                <TableHead sx={{bgcolor: "rgb(43 43 43)", border: "1px solid rgba(81, 81, 81, 1)"}}>
                   <TableRow>
                     <TableCell sx={{fontSize: "1.5rem"}}>TransactionID</TableCell>
                     <TableCell sx={{fontSize: "1.5rem"}} align="right">Seller</TableCell>
@@ -95,7 +95,7 @@ const Transactions = () => {
                     <TableCell sx={{fontSize: "1.5rem"}} align="right">Details</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody sx={{bgcolor: "rgb(43 43 43)", border: "1px solid rgba(81, 81, 81, 1)"}}>
                   {rows.map((row) => (
                     <TableRow
                       key={row.name}
@@ -133,236 +133,10 @@ const Transactions = () => {
 
 export default Transactions;
 
-const rows = [
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-  createData(
-    makeid(18),
-    generateFakeUsername(),
-    generateFakeUsername(),
-    makeid(16),
-    Math.floor(Math.random() * 1000)
-  ),
-];
+const rows = Array.from({ length: 150 }, () => createData(
+  makeid(18),
+  generateFakeUsername(),
+  generateFakeUsername(),
+  makeid(16),
+  Math.floor(Math.random() * 10000)
+));
