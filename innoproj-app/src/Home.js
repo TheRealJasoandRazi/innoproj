@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import QuizIcon from "@mui/icons-material/Quiz";
 import { useNavigate } from "react-router-dom";
+import WatchList from "./WatchList";
 
 const darkTheme = createTheme({
   palette: {
@@ -139,6 +140,10 @@ const Home = () => {
                 </IconButton>
               </Typography>
             </Box>
+            <Typography variant="h6">WatchList: </Typography>
+            <Typography variant="h6">
+                <WatchList />
+              </Typography>
           </Box>
         </Container>
       </CssBaseline>
