@@ -54,14 +54,15 @@ const Home = () => {
                         maxWidth: "25%", // Set the maximum width of each item
                         overflowY: "hidden",
                         margin: "0", // Add some spacing between items
+                        height: "100vh",
                         "&:hover": {
-                          border: "1px solid white",
+                          border: "1px solid indigo",
                         },
                       }}
                       onClick={() => handleImageClick(item.img, item.title)}
                     >
                       <img
-                        src={`${item.img}?w=200&h=200&fit=crop&auto=format&dpr=2`}
+                        src={`${item.img}?w=200&h=250&fit=crop&auto=format&dpr=2`}
                         alt={item.title}
                         loading="lazy"
                         onClick={() => {}}
@@ -74,11 +75,7 @@ const Home = () => {
                         }
                         subtitle={
                           <span style={{ color: "white", whiteSpace: "wrap" }}>
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Expedita, quaerat recusandae in, praesentium
-                            inventore sint earum itaque laborum et dicta ab!
-                            Repudiandae consectetur culpa commodi reprehenderit,
-                            ut ipsum placeat magni!
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat quis sapiente incidunt dolore dolorem officiis sunt est eius atque.
                           </span>
                         }
                         sx={{ height: "35%" }}
@@ -141,11 +138,11 @@ const itemData = [
   },
   {
     img: "https://images.unsplash.com/photo-1431440869543-efaf3388c585",
-    title: "thunder",
+    title: "Thunder",
   },
   {
     img: "https://images.unsplash.com/photo-1516410529446-2c777cb7366d",
-    title: "road",
+    title: "Road",
   },
   {
     img: "https://images.unsplash.com/photo-1477346611705-65d1883cee1e",

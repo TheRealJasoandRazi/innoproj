@@ -27,7 +27,7 @@ const NavBar = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: "#303F9F", // Dark blue color
+        main: "#00041e", // Dark blue color
       },
       secondary: {
         main: "#FF4081", // Light pink color
@@ -106,19 +106,18 @@ const NavBar = () => {
           <Stack direction="row" spacing={2}>
             {/* Search Bar */}
             <form>
-              <Box sx={{ pt: "0.5rem" }}>
+              <Box sx={{ pt: "0.5rem",  }}>
                 <TextField
                   id="search-bar"
                   className="text"
                   onInput={(e) => {
                     console.log(e.target.value);
                   }}
-                  label={<span>Search for an asset..</span>}
+                  label={<span style={{color: "white"}}>Search for an asset..</span>}
                   variant="outlined"
                   placeholder="Search..."
                   size="small"
-                  color="secondary"
-                  sx={{ borderColor: "white" }}
+                  sx={{color: "white"}}
                 />
                 <IconButton
                   sx={{ borderRadius: 0 }}
@@ -141,9 +140,11 @@ const NavBar = () => {
             <IconButton
               aria-label="cart"
               sx={{
-                border: "1px solid lightblue",
+                border: "1px solid black",
                 borderRadius: "10%",
-                bgcolor: "darkblue",
+                bgcolor: "#00063fbb",
+                pl: "0.75rem",
+                pr: "0.75rem",
               }}
             >
               <ShoppingCartIcon />

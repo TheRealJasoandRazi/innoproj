@@ -9,10 +9,10 @@
 body {
   background-color: #000000;
   opacity: 1;
-  background-image: linear-gradient(#4e0083 2px, transparent 2px),
-    linear-gradient(90deg, rgb(132, 0, 255) 2px, transparent 2px),
-    linear-gradient(#4e0083 1px, transparent 1px),
-    linear-gradient(90deg, #4e0083 1px, #000000 1px);
+  background-image: linear-gradient(indigo 2px, transparent 2px),
+    linear-gradient(90deg, indigo 2px, transparent 2px),
+    linear-gradient(#3b0063 1px, transparent 1px),
+    linear-gradient(90deg, #3b0063 1px, #000000 1px);
   background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
   background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
 }
