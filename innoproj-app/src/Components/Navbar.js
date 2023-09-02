@@ -96,7 +96,10 @@ const NavBar = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar position="static" color="primary">
+      <AppBar position="static" color="primary" sx={{ 
+        //Add box shadow to the bottom of the element
+        boxShadow: "0px 2.0rem 2.5rem rgba(0, 0, 0, 1)",
+        }}>
         <Toolbar>
           {/* Logo */}
           <IconButton href="/" edge="start" color="inherit" aria-label="logo">
@@ -106,18 +109,22 @@ const NavBar = () => {
           <Stack direction="row" spacing={2}>
             {/* Search Bar */}
             <form>
-              <Box sx={{ pt: "0.5rem",  }}>
+              <Box sx={{ pt: "0.5rem" }}>
                 <TextField
                   id="search-bar"
                   className="text"
                   onInput={(e) => {
                     console.log(e.target.value);
                   }}
-                  label={<span style={{color: "white"}}>Search for an asset..</span>}
+                  label={
+                    <span style={{ color: "white" }}>
+                      Search for an asset..
+                    </span>
+                  }
                   variant="outlined"
                   placeholder="Search..."
                   size="small"
-                  sx={{color: "white"}}
+                  sx={{ color: "white" }}
                 />
                 <IconButton
                   sx={{ borderRadius: 0 }}
