@@ -12,7 +12,7 @@ import {
   Stack,
   IconButton,
   Icon,
-  Button
+  Button,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddIcon from "@mui/icons-material/Add";
@@ -54,8 +54,13 @@ const AssetsPage = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline>
-        <Container fixed sx={{ bgcolor: "#1f1f2f" }}>
-          <Grid container spacing={2} sx={{ mt: "10px" }}>
+        <Container
+          fixed
+          sx={{
+            bgcolor: "#1f1f2f",
+          }}
+        >
+          <Grid container spacing={2} sx={{ mt: "10px", height: "100vh" }}>
             <Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
               <Box
                 component="img"
@@ -88,19 +93,57 @@ const AssetsPage = () => {
                   rerum inventore dolore harum, minus aspernatur temporibus
                   officiis?
                 </Typography>
-                <Typography variant="h6">
-                  Price: 1000$
-                </Typography>
-                <Stack direction={"row"} gap={2}>
-                  <IconButton onClick={() => setCount(itemCount + 1)}>
-                    <AddIcon />
+                <Typography variant="h6">Price: 1000$</Typography>
+                <Stack direction={"row"} gap={0}>
+                  <IconButton
+                    onClick={() => setCount(itemCount + 1)}
+                    sx={{
+                      border: "1px solid magenta",
+                      borderRadius: "0",
+                      borderRight: "none",
+                    }}
+                  >
+                    <AddIcon sx={{ fill: "magenta" }} />
                   </IconButton>
-                  <Typography variant="h5">QTY: {itemCount}</Typography>
-                  <IconButton onClick={() => setCount(itemCount - 1)}>
-                    <RemoveIcon />
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      border: "1px solid magenta",
+                      borderRadius: "0",
+                      p: "0.75rem",
+                      borderLeft: "none",
+                      borderRight: "none",
+                    }}
+                  >
+                    QTY: {itemCount}
+                  </Typography>
+                  <IconButton
+                    onClick={() => setCount(itemCount - 1)}
+                    sx={{
+                      border: "1px solid magenta",
+                      borderRadius: "0",
+                      borderLeft: "none",
+                    }}
+                  >
+                    <RemoveIcon sx={{ fill: "magenta" }} />
                   </IconButton>
                 </Stack>
-                <Button variant="contained" size="large" color="secondary">Add To Cart</Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    fontSize: "1rem",
+                    width: "fit-content",
+                    p: "0.75rem",
+                    color: "magenta",
+                    borderColor: "magenta",
+                    "&:hover": {
+                      borderColor: "lightblue",
+                      color: "lightblue",
+                    },
+                  }}
+                >
+                  Add To Cart
+                </Button>
               </Stack>
             </Grid>
           </Grid>
