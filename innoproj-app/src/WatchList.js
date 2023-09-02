@@ -3,7 +3,6 @@ import {
   Box,
   CssBaseline,
   ThemeProvider,
-  createTheme,
 } from "@mui/material";
 import darkTheme from "./DarkTheme";
 

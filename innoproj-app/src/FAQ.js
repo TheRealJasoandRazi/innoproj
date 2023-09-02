@@ -7,30 +7,9 @@ import {
   Box,
   CssBaseline,
   ThemeProvider,
-  createTheme,
-  IconButton,
 } from "@mui/material";
-import QuizIcon from "@mui/icons-material/Quiz";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#474752", // Replace with your desired primary color
-    },
-    background: {
-      default: "#21212f", // Replace with your desired background color
-      paper: "#1e1e1e",
-      box: "white",
-    },
-  },
-  typography: {
-    allVariants: {
-      color: "white", // Set all text to white
-    },
-  },
-});
+import darkTheme from "./DarkTheme";
 
 const FAQpage = () => {
   return (
@@ -39,12 +18,11 @@ const FAQpage = () => {
         <Container fixed sx={{ bgcolor: "#1f1f2f" }}>
           <Box sx={{ height: "100vh", pt: "10px" }}>
             <Box sx={{ borderBottom: "3px solid white" }}>
-              <Typography variant="h3">
-                FAQ Page:{" "}
-                <QuizIcon edge="start" sx={{ fill: "white", fontSize: 50 }} />
+              <Typography variant="h4">
+                Frequently Asked Questions&nbsp;
               </Typography>
             </Box>
-            <Box sx={{ mt: 10 }}>
+            <Box sx={{ mt: 5 }}>
               <Accordion>
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
