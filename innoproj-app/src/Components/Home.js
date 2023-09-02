@@ -28,7 +28,7 @@ const Home = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline>
-        <Container fixed sx={{ bgcolor: "#1f1f2f" }}>
+        <Container fixed sx={{ bgcolor: "#1f1f2f", boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)" }}>
           <Box sx={{ pt: "10px" }}>
             <Box sx={{ mb: "10px", borderBottom: "2px solid white" }}>
               <Typography variant="h6">Balance: {userBalance}$</Typography>

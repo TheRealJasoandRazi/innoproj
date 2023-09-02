@@ -58,7 +58,8 @@ const AssetsPage = () => {
           fixed
           sx={{
             bgcolor: "#1f1f2f",
-            pt: "10px"
+            pt: "10px",
+            boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
           }}
         >
           <Grid container spacing={2} sx={{ mt: "10px", height: "100vh" }}>

@@ -1,9 +1,4 @@
-import {
-  Container,
-  Box,
-  CssBaseline,
-  ThemeProvider,
-} from "@mui/material";
+import { Container, Box, CssBaseline, ThemeProvider } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
 
 const WishList = () => {

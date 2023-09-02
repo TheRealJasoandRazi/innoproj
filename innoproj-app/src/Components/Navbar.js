@@ -98,12 +98,12 @@ const NavBar = () => {
     <ThemeProvider theme={theme}>
       <AppBar position="static" color="primary" sx={{ 
         //Add box shadow to the bottom of the element
-        boxShadow: "0px 2.0rem 2.5rem rgba(0, 0, 0, 1)",
+        boxShadow: "0px 2.0rem 2.5rem rgba(0, 0, 0, 1)"
         }}>
         <Toolbar>
           {/* Logo */}
-          <IconButton href="/" edge="start" color="inherit" aria-label="logo">
-            <HiveSharpIcon sx={{ fontSize: 40 }} />
+          <IconButton href="/" edge="start" color="inherit" aria-label="logo" sx={{p:"0.5rem"}}>
+            <HiveSharpIcon sx={{ fontSize: 55, fill: "indigo", outline: "1px solid black", bgcolor: "black", borderRadius: "10%" }} />
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
           <Stack direction="row" spacing={2}>

@@ -12,9 +12,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
 } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
 import DetailsIcon from "@mui/icons-material/Details";
+import { useState } from "react";
 
 // Define the Transactions component
 const Transactions = () => {
@@ -85,12 +87,31 @@ const Transactions = () => {
     )
   );
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(14);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   return (
     // Theme and layout setup
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Container fixed sx={{ bgcolor: "#1f1f2f" }}>
-        <Box sx={{ height: "100vh", pt: "10px" }}>
+      <Container
+        fixed
+        sx={{
+          bgcolor: "#1f1f2f",
+          boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
+          height: "100vh"
+        }}
+      >
+        <Box sx={{ pt: "10px" }}>
           {/* Title */}
           <Typography variant="h4" sx={{ mb: "1.5rem" }}>
             Transaction History
@@ -138,33 +159,44 @@ const Transactions = () => {
                   border: "1px solid rgba(81, 81, 81, 1)",
                 }}
               >
-                {rows.map((row) => (
-                  <TableRow
-                    key={row.name}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row.transaction}
-                    </TableCell>
-                    <TableCell align="right">
-                      <a href="">u/{row.seller}</a>
-                    </TableCell>
-                    <TableCell align="right">
-                      <a href="">u/{row.buyer}</a>
-                    </TableCell>
-                    <TableCell align="right">{row.asset}</TableCell>
-                    <TableCell align="right">{row.total}</TableCell>
-                    <TableCell align="right">
-                      {/* Icon button for details */}
-                      <IconButton sx={{ borderRadius: "0" }}>
-                        <DetailsIcon sx={{ fontSize: 20, fill: "indigo" }} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow
+                      key={row.name}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {row.transaction}
+                      </TableCell>
+                      <TableCell align="right">
+                        <a href="">u/{row.seller}</a>
+                      </TableCell>
+                      <TableCell align="right">
+                        <a href="">u/{row.buyer}</a>
+                      </TableCell>
+                      <TableCell align="right">{row.asset}</TableCell>
+                      <TableCell align="right">{row.total}</TableCell>
+                      <TableCell align="right">
+                        {/* Icon button for details */}
+                        <IconButton sx={{ borderRadius: "0" }}>
+                          <DetailsIcon sx={{ fontSize: 20, fill: "indigo" }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[14, 25, 100]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Box>
       </Container>
     </ThemeProvider>
