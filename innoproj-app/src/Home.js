@@ -12,7 +12,6 @@ import {
   createTheme,
   IconButton,
 } from "@mui/material";
-import NavBar from "./Navbar";
 import QuizIcon from "@mui/icons-material/Quiz";
 import { useNavigate } from "react-router-dom";
 
@@ -131,6 +130,7 @@ const Home = () => {
                 maxime iusto architecto inventore velit aut voluptatibus. Earum
                 nesciunt adipisci facilis. Soluta tenetur aliquam quae
                 perspiciatis sequi?
+                
               </Typography>
               <Typography variant="h6" sx={{ mt: "10px" }}>
                 FAQ Page:{" "}

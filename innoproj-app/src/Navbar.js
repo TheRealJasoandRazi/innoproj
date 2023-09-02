@@ -7,11 +7,13 @@ import {
   Box,
   TextField,
   ThemeProvider,
+  Typography,
 } from "@mui/material";
 import HiveSharpIcon from "@mui/icons-material/HiveSharp";
 import SearchIcon from "@mui/icons-material/Search";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
@@ -27,6 +29,8 @@ const theme = createTheme({
 });
 
 const NavBar = () => {
+  let cartCount = 10;
+
   return (
     <ThemeProvider theme={theme}>
       <AppBar position="static" color="primary">
@@ -48,14 +52,22 @@ const NavBar = () => {
                 placeholder="Search..."
                 size="small"
                 color="secondary"
-                sx={{borderColor: "white"}}
+                sx={{ borderColor: "white" }}
               />
               <IconButton type="submit" aria-label="search">
                 <SearchIcon />
               </IconButton>
             </form>
-            <IconButton href="/market-place" aria-label="market-place" variant="outlined">
+            <IconButton
+              href="/market-place"
+              aria-label="market-place"
+              variant="outlined"
+            >
               <StorefrontIcon />
+            </IconButton>
+            <IconButton aria-label="cart" sx={{border: "1px solid lightblue", borderRadius: "10%", bgcolor: "darkblue"}}>
+              <ShoppingCartIcon />
+              <Typography variant="h8" sx={{pl: "0.5rem"}}>{cartCount}</Typography>
             </IconButton>
             <IconButton aria-label="profile">
               <AccountCircleIcon />
