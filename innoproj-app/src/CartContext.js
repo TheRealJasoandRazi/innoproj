@@ -6,9 +6,21 @@ export function useCart() {
   return useContext(CartContext);
 }
 
+/**
+ * items array - [
+ *  {
+ *   name - name of the item|product,
+ *   price - unit price of the product
+ *   qty - number of units 
+ * }
+ * ....
+ * ]
+ * */
+
 export function CartProvider({ children }) {
   const [cart, setCart] = useState({
     quantity: 0,
+    totalPrice: 0,
     items: [],
   });
 
