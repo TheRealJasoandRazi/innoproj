@@ -166,6 +166,9 @@ const NavBar = () => {
                 pl: "0.75rem",
                 pr: "0.75rem",
               }}
+              onClick={() => {
+                console.log(cart);
+              }}
             >
               <ShoppingCartIcon />
               <Typography variant="h8" sx={{ pl: "0.5rem" }}>

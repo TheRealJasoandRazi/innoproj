@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
@@ -6,22 +6,25 @@ export function useCart() {
   return useContext(CartContext);
 }
 
-/**
- * items array - [
- *  {
- *   item - name of the item|product, *In the first assignment (img, title)*
- *   price - unit price of the product
- *   qty - number of units
- * }
- * ....
- * ]
- * */
-
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState({
-    quantity: 0,
-    totalPrice: 0,
-    items: [],
+  /**
+   * items array - [
+   *  {
+   *   item - name of the item|product, *In the first assignment (img, title, price)*
+   *   price - unit price of the product
+   *   qty - number of units
+   * }
+   * ....
+   * ]
+   * */
+  // Load cart state from localStorage on initialization
+  const [cart, setCart] = useState(() => {
+    const savedCart = JSON.parse(localStorage.getItem("cart")) || {
+      quantity: 0,
+      totalPrice: 0,
+      items: [],
+    };
+    return savedCart;
   });
 
   // Function to add an item to the cart
@@ -29,7 +32,7 @@ export function CartProvider({ children }) {
     setCart((prevCart) => ({
       ...prevCart,
       quantity: prevCart.quantity + item.qty,
-      totalPrice: prevCart.totalPrice + item.price,
+      totalPrice: prevCart.totalPrice + item.price * item.qty,
       items: [...prevCart.items, item],
     }));
   };
@@ -47,8 +50,13 @@ export function CartProvider({ children }) {
     }));
   };
 
+  // Save cart state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
   return (
-    <CartContext.Provider value={{ cart, setCart }}>
+    <CartContext.Provider value={{ cart, addItemToCart, removeItemFromCart }}>
       {children}
     </CartContext.Provider>
   );

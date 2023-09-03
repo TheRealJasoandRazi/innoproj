@@ -8,10 +8,10 @@ import { CartProvider } from "./Contexts/CartContext";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <CartProvider>
+    <CartProvider>
+      <BrowserRouter>
         <App />
-      </CartProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </CartProvider>
   </React.StrictMode>
 );

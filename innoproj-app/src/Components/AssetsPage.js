@@ -17,6 +17,7 @@ import {
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import { useCart } from "../Contexts/CartContext";
 
 const darkTheme = createTheme({
   palette: {
@@ -42,17 +43,13 @@ const AssetsPage = () => {
   const queryString = new URLSearchParams(location.search);
   const encodedData = queryString.get("param");
 
+  const { addItemToCart } = useCart();
+
   let decodedData = { img: "", title: "" };
 
   if (encodedData) {
-    // 'encodedData' now contains the encoded JSON data
-    console.log("Encoded data:", encodedData);
-
     // Decode the data and parse it back to a JavaScript object
     decodedData = JSON.parse(decodeURIComponent(encodedData));
-
-    // Now 'decodedData' contains your original object
-    console.log("Decoded data:", decodedData);
   }
 
   const [itemCount, setCount] = useState(0);
@@ -150,6 +147,15 @@ const AssetsPage = () => {
                       borderColor: "lightblue",
                       color: "lightblue",
                     },
+                  }}
+                  onClick={() => {
+                    // Add items to the cart using addItemToCart
+                    const item = {
+                      name: { title: decodedData.title, src: decodedData.img }, // Use imgTitle
+                      price: decodedData.price,
+                      qty: itemCount,
+                    };
+                    addItemToCart(item); // Call addItemToCart from useCart
                   }}
                 >
                   Add To Cart |{" "}
