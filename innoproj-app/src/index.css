@@ -21,7 +21,7 @@ body {
   background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px; /* Set background positions */
 }
 
-/* Scrollbar styles for WebKit-based browsers (Chrome, Safari) */
+/* Scrollbar styles */
 /* Set the width of the scrollbar */
 ::-webkit-scrollbar {
   width: 10px;

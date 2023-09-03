@@ -8,7 +8,6 @@ import {
   ImageListItem,
   CssBaseline,
   ThemeProvider,
-  createTheme,
   IconButton,
 } from "@mui/material";
 import QuizIcon from "@mui/icons-material/Quiz";

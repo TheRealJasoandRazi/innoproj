@@ -12,7 +12,6 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
-  InputAdornment,
   IconButton,
   Button,
   Stack,
@@ -22,7 +21,7 @@ import {
 import darkTheme from "../Themes/DarkTheme";
 import { styled, alpha } from "@mui/material/styles";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import itemData from "../Data/ImageArray";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SearchIcon from "@mui/icons-material/Search";

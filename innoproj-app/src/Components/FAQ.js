@@ -15,7 +15,13 @@ const FAQpage = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline>
-        <Container fixed sx={{ bgcolor: "#1f1f2f", boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)"  }}>
+        <Container
+          fixed
+          sx={{
+            bgcolor: "#1f1f2f",
+            boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
+          }}
+        >
           <Box sx={{ height: "100vh", pt: "10px" }}>
             <Box sx={{ borderBottom: "3px solid white" }}>
               <Typography variant="h4">

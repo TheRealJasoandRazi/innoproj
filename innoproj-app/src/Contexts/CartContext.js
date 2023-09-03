@@ -1,11 +1,14 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
+// Create a context for the shopping cart
 const CartContext = createContext();
 
+// Custom hook to access the cart context
 export function useCart() {
   return useContext(CartContext);
 }
 
+// CartProvider component that manages the shopping cart state
 export function CartProvider({ children }) {
   /**
    * items array - [
@@ -17,6 +20,7 @@ export function CartProvider({ children }) {
    * ....
    * ]
    * */
+
   // Load cart state from localStorage on initialization
   const [cart, setCart] = useState(() => {
     const savedCart = JSON.parse(localStorage.getItem("cart")) || {
@@ -45,11 +49,14 @@ export function CartProvider({ children }) {
     setCart((prevCart) => ({
       ...prevCart,
       quantity: prevCart.quantity - prevCart.items[index].qty,
-      totalPrice: prevCart.totalPrice - prevCart.items[index].price * prevCart.items[index].qty,
+      totalPrice:
+        prevCart.totalPrice -
+        prevCart.items[index].price * prevCart.items[index].qty,
       items: updatedItems,
     }));
   };
 
+  // Function to reset the cart
   const resetCart = () => {
     setCart(() => ({
       quantity: 0,
@@ -64,7 +71,9 @@ export function CartProvider({ children }) {
   }, [cart]);
 
   return (
-    <CartContext.Provider value={{ cart, addItemToCart, removeItemFromCart, resetCart }}>
+    <CartContext.Provider
+      value={{ cart, addItemToCart, removeItemFromCart, resetCart }}
+    >
       {children}
     </CartContext.Provider>
   );

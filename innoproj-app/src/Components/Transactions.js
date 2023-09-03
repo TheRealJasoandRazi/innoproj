@@ -108,7 +108,7 @@ const Transactions = () => {
         sx={{
           bgcolor: "#1f1f2f",
           boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
-          height: "100vh"
+          height: "100vh",
         }}
       >
         <Box sx={{ pt: "10px" }}>

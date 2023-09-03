@@ -8,10 +8,8 @@ import {
   Box,
   Typography,
   Grid,
-  Paper,
   Stack,
   IconButton,
-  Icon,
   Button,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";

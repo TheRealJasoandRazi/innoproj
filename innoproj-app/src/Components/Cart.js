@@ -12,11 +12,9 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  IconButton,
   Button,
 } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
-import DetailsIcon from "@mui/icons-material/Details";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../Contexts/CartContext";
 
