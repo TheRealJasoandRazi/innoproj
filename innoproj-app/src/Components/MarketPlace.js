@@ -1,29 +1,127 @@
 import {
-  Grid,
   Container,
   Box,
   Typography,
   Card,
-  CardHeader,
-  CardMedia,
-  CardContent,
-  CardActions,
-  Collapse,
-  Avatar,
-  createTheme,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   ThemeProvider,
   CssBaseline,
+  Tooltip,
 } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
+import itemData from "../Data/ImageArray";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { useNavigate, Link } from "react-router-dom";
 
 const MarketPlace = () => {
+  // Function to generate a fake username
+  function generateFakeUsername() {
+    const adjectives = [
+      "Cool",
+      "Funny",
+      "Smart",
+      "Clever",
+      "Creative",
+      "Silly",
+      "Awesome",
+      "Happy",
+      "Gentle",
+      "Mysterious",
+    ];
+    const nouns = [
+      "Ninja",
+      "Panda",
+      "Unicorn",
+      "Wizard",
+      "Dragon",
+      "Star",
+      "Rocket",
+      "Lion",
+      "Tiger",
+      "Phoenix",
+    ];
+
+    const randomAdjective =
+      adjectives[Math.floor(Math.random() * adjectives.length)];
+    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+
+    const randomNumber = Math.floor(Math.random() * 100);
+
+    const fakeUsername = `${randomAdjective}${randomNoun}${randomNumber}`;
+
+    return fakeUsername;
+  }
+
+  const navigate = useNavigate();
+
+  const handleImageClick = (item) => {
+    const encodedData = encodeURIComponent(JSON.stringify(item));
+    navigate(`/asset?param=${encodedData}`);
+  };
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline>
-        <Container fixed sx={{ bgcolor: "#1f1f2f" }}>
-          <Grid container>
-              {}
-          </Grid>
+        <Container
+          fixed
+          sx={{
+            bgcolor: "#1f1f2f",
+            boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
+            pt: "10px"
+          }}
+        >
+          <Box sx={{borderBottom: "0.25rem solid indigo", pb: "0.5rem"}}>
+            <Typography variant="h3">Marketplace</Typography>
+          </Box>
+          <Box>
+            <ImageList
+              gap={4}
+              sx={{
+                mb: 8,
+                gridTemplateColumns:
+                  "repeat(auto-fill, minmax(280px, 1fr))!important",
+              }}
+            >
+              {itemData.map((item) => (
+                <Card key={item.id}>
+                  <ImageListItem
+                    key={item.id}
+                    sx={{
+                      "&:hover": {
+                        border: "1px solid indigo",
+                      },
+                    }}
+                    onClick={() => handleImageClick(item)}
+                  >
+                    <ImageListItemBar
+                      sx={{
+                        background:
+                          "linear-gradient(to bottom, rgba(0,0,0,0.7)0%, rgba(0,0,0,0.3)70%, rgba(0,0,0,0)100%)",
+                      }}
+                      title={"$" + Math.floor(Math.random() * 1000)}
+                      actionIcon={
+                        <Tooltip
+                          title={generateFakeUsername()}
+                          sx={{ mr: "5px" }}
+                        >
+                          <AccountCircleIcon />
+                        </Tooltip>
+                      }
+                      position="top"
+                    />
+                    <img
+                      src={`${item.img}?w=200&h=250&fit=crop&auto=format&dpr=2`}
+                      alt={item.title}
+                      loading="lazy"
+                      onClick={() => {}}
+                    />
+                    <ImageListItemBar title={item.title} />
+                  </ImageListItem>
+                </Card>
+              ))}
+            </ImageList>
+          </Box>
         </Container>
       </CssBaseline>
     </ThemeProvider>
@@ -31,102 +129,3 @@ const MarketPlace = () => {
 };
 
 export default MarketPlace;
-
-const itemData = [
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-];

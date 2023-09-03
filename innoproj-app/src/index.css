@@ -54,3 +54,7 @@ body {
   border-radius: 6px; /* Add rounded corners to the thumb */
   height: 10px; /* Change the height of the thumb */
 }
+
+input {
+  color: white !important;
+}

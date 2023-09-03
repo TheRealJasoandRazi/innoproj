@@ -30,7 +30,7 @@ const NavBar = () => {
         main: "#00041e", // Dark blue color
       },
       secondary: {
-        main: "#FF4081", // Light pink color
+        main: "rgb(75, 0, 130)", // Light pink color
       },
       divider: "#ffffff", // White color for the divider (outline)
     },
@@ -96,14 +96,31 @@ const NavBar = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar position="static" color="primary" sx={{ 
-        //Add box shadow to the bottom of the element
-        boxShadow: "0px 2.0rem 2.5rem rgba(0, 0, 0, 1)"
-        }}>
+      <AppBar
+        position="static"
+        color="primary"
+        sx={{
+          //Add box shadow to the bottom of the element
+          boxShadow: "0px 2.0rem 2.5rem rgba(0, 0, 0, 1)",
+        }}
+      >
         <Toolbar>
           {/* Logo */}
-          <IconButton href="/" edge="start" color="inherit" aria-label="logo" sx={{p:"0.5rem"}}>
-            <HiveSharpIcon sx={{ fontSize: 55, fill: "indigo", outline: "1px solid black", bgcolor: "black", borderRadius: "10%" }} />
+          <IconButton
+            href="/"
+            edge="start"
+            color="inherit"
+            aria-label="logo"
+            sx={{ p: "0.5rem" }}
+          >
+            <HiveSharpIcon
+              sx={{
+                fontSize: 55,
+                fill: "indigo",
+                outline: "1px solid black",
+                borderRadius: "10%",
+              }}
+            />
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
           <Stack direction="row" spacing={2}>
@@ -116,15 +133,11 @@ const NavBar = () => {
                   onInput={(e) => {
                     console.log(e.target.value);
                   }}
-                  label={
-                    <span style={{ color: "white" }}>
-                      Search for an asset..
-                    </span>
-                  }
+                  label={<span>Search for an asset..</span>}
                   variant="outlined"
                   placeholder="Search..."
                   size="small"
-                  sx={{ color: "white" }}
+                  color="secondary"
                 />
                 <IconButton
                   sx={{ borderRadius: 0 }}

@@ -40,13 +40,19 @@ const darkTheme = createTheme({
 const AssetsPage = () => {
   const location = useLocation();
   const queryString = new URLSearchParams(location.search);
-  const paramValue = queryString.get("param");
+  const encodedData = queryString.get("param");
 
-  let paramValuesArray;
+  let decodedData = { img: "", title: "" };
 
-  if (paramValue) {
-    paramValuesArray = paramValue.split(",");
-    console.log("Param values:", paramValuesArray);
+  if (encodedData) {
+    // 'encodedData' now contains the encoded JSON data
+    console.log("Encoded data:", encodedData);
+
+    // Decode the data and parse it back to a JavaScript object
+    decodedData = JSON.parse(decodeURIComponent(encodedData));
+
+    // Now 'decodedData' contains your original object
+    console.log("Decoded data:", decodedData);
   }
 
   const [itemCount, setCount] = useState(0);
@@ -68,11 +74,11 @@ const AssetsPage = () => {
                 component="img"
                 sx={{
                   aspectRatio: "16/9",
+                  boxShadow: "0 0 2.5rem rgba(0, 0, 0, 0.75)", // Add a box shadow here
                 }}
-                alt={paramValuesArray[1]}
+                alt={decodedData.title}
                 src={
-                  paramValuesArray[0] +
-                  "?w=250&h=350&fit=crop&auto=format&dpr=2"
+                  decodedData.img + "?w=250&h=350&fit=crop&auto=format&dpr=2"
                 }
               />
             </Grid>
@@ -87,7 +93,7 @@ const AssetsPage = () => {
                   />
                   <Typography variant="h4">Account Name</Typography>
                 </IconButton>
-                <Typography variant="h4">{paramValuesArray[1]}</Typography>
+                <Typography variant="h4">{decodedData.title}</Typography>
                 <Typography variant="h8">
                   Keywords: Lorem ipsum dolor sit amet consectetur adipisicing
                   elit. Ipsum, dolor assumenda. Recusandae ab illum natus
@@ -95,7 +101,9 @@ const AssetsPage = () => {
                   rerum inventore dolore harum, minus aspernatur temporibus
                   officiis?
                 </Typography>
-                <Typography variant="h6">Price: 1000$</Typography>
+                <Typography variant="h6">
+                  Price: {Math.floor(Math.random() * 1000)}$
+                </Typography>
                 <Stack direction={"row"} gap={0}>
                   <IconButton
                     onClick={() => setCount(itemCount + 1)}
