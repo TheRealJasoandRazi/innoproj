@@ -99,7 +99,7 @@ const MarketPlace = () => {
                         background:
                           "linear-gradient(to bottom, rgba(0,0,0,0.7)0%, rgba(0,0,0,0.3)70%, rgba(0,0,0,0)100%)",
                       }}
-                      title={"$" + Math.floor(Math.random() * 1000)}
+                      title={"$" + item.price.toLocaleString()}
                       actionIcon={
                         <Tooltip
                           title={generateFakeUsername()}

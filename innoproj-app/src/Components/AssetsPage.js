@@ -102,7 +102,7 @@ const AssetsPage = () => {
                   officiis?
                 </Typography>
                 <Typography variant="h6">
-                  Price: {Math.floor(Math.random() * 1000)}$
+                  Price: {decodedData.price.toLocaleString()} $
                 </Typography>
                 <Stack direction={"row"} gap={0}>
                   <IconButton
@@ -152,7 +152,8 @@ const AssetsPage = () => {
                     },
                   }}
                 >
-                  Add To Cart
+                  Add To Cart |{" "}
+                  {(decodedData.price * itemCount).toLocaleString()} $ |
                 </Button>
               </Stack>
             </Grid>
