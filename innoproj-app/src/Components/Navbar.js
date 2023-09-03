@@ -158,6 +158,7 @@ const NavBar = () => {
             </IconButton>
             {/* Shopping Cart */}
             <IconButton
+              href="/cart"
               aria-label="cart"
               sx={{
                 border: "1px solid black",
@@ -165,9 +166,6 @@ const NavBar = () => {
                 bgcolor: "#00063fbb",
                 pl: "0.75rem",
                 pr: "0.75rem",
-              }}
-              onClick={() => {
-                console.log(cart);
               }}
             >
               <ShoppingCartIcon />

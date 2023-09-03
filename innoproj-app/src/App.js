@@ -4,6 +4,7 @@ import MarketPlace from "./Components/MarketPlace";
 import AssetsPage from "./Components/AssetsPage";
 import Transactions from "./Components/Transactions";
 import FAQpage from "./Components/FAQ";
+import Cart from "./Components/Cart";
 import { Route, Routes } from "react-router-dom";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/asset" element={<AssetsPage />} />
         <Route path="/faq" element={<FAQpage />} />
         <Route path="/transactions" element={<Transactions />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </>
   );

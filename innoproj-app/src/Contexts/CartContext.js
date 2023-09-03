@@ -45,8 +45,16 @@ export function CartProvider({ children }) {
     setCart((prevCart) => ({
       ...prevCart,
       quantity: prevCart.quantity - prevCart.items[index].qty,
-      totalPrice: prevCart.totalPrice - prevCart.items[index].price,
+      totalPrice: prevCart.totalPrice - prevCart.items[index].price * prevCart.items[index].qty,
       items: updatedItems,
+    }));
+  };
+
+  const resetCart = () => {
+    setCart(() => ({
+      quantity: 0,
+      totalPrice: 0,
+      items: [],
     }));
   };
 
@@ -56,7 +64,7 @@ export function CartProvider({ children }) {
   }, [cart]);
 
   return (
-    <CartContext.Provider value={{ cart, addItemToCart, removeItemFromCart }}>
+    <CartContext.Provider value={{ cart, addItemToCart, removeItemFromCart, resetCart }}>
       {children}
     </CartContext.Provider>
   );
