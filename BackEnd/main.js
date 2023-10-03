@@ -8,8 +8,8 @@ const init = async () => {
     const accounts = await web3.eth.getAccounts();
     const networkId = await web3.eth.net.getId();
 
-    const senderAddress = "0x8AD5B94c74d10F67dd8e3cc146b9DbEcAfE8539F";
-    const receiverAddress = "0x1B773f10d2B9Ce7309764742b0ed189B0E443d20";
+    const senderAddress = "0x7b8aBbC11db9FA05984F9B5Fb30E7fc7BB25Cb80";
+    const receiverAddress = "0x7b3F63964A2B1C7Cda2f2fc9f0B2D1edC21a839B";
 
     if (!TransactionStorage.networks[networkId]) {
       throw new Error("Contract not deployed on the current network.");

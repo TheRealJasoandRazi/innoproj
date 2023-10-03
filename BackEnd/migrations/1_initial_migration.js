@@ -1,4 +1,4 @@
-const TransactionStorage = artifacts.require("../contracts/TransactionStorage");
+const TransactionStorage = artifacts.require("TransactionStorage");
 
 module.exports = function (deployer) {
   // Deploy the TransactionStorage contract
