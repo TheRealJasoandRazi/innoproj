@@ -1,7 +1,7 @@
 const { Web3 } = require("web3");
 const TransactionStorage = require("./build/contracts/TransactionStorage.json");
 
-const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
+const web3 = new Web3("HTTP://127.0.0.1:7545"); // Connect to a local Ethereum node
 
 const init = async () => {
   try {
