@@ -18,11 +18,32 @@ sql_template = """
 
 fake = Faker()
 
+sql_template = """
+    INSERT INTO Asset (Asset_ID, Price, Key_Words, Image, Rarity)
+    VALUES ({v1}, {v2}, {v3}, {v4}, {v5});
+"""
+#sql_statement = sql_template.format(v1=x, v2=x, v3=x, v4=x, v5=x)
+#print(sql_statement)
+
+fake = Faker()
 
 def extract_objects(raw_svg: str):
     return raw_svg.replace('<svg viewBox="0 0 500 500"', '').replace(
         '</svg>', '').replace('<?xml version="1.0" encoding="utf-8"?>', '').replace('xmlns="http://www.w3.org/2000/svg">', '')
 
+def combine_keys(*dicts):
+    keys = []
+    for d in dicts:
+        if "keywords" in d:
+            keys.extend(d["keywords"])
+    return list(set(keys))
+
+def gen_unique_rarity(*dicts):
+    unique_rarity = 1.0
+    for d in dicts:
+        if 'rarity' in d:
+            unique_rarity = unique_rarity * d['rarity']
+    return unique_rarity
 
 def combine_keys(*dicts):
     keys = []
@@ -122,4 +143,5 @@ for file in set(files.split('.')[0] for files in os.listdir(base_dir + "backgrou
                                         keys), v4=location, v5=random_rarity))
 
 
+                                
 print(count)
