@@ -46,7 +46,7 @@ api.post("/auth", (req, res) => {
 
   //Check if user exists
   return con.query(
-    "SELECT * FROM Account WHERE Username = '${user_data.username}';",
+    "SELECT * FROM Account WHERE Username = '" + user_data.username + "';",
     function (err, result, fields) {
       if (err) {
         console.error(err);
@@ -75,7 +75,11 @@ api.post("/auth", (req, res) => {
   );
 });
 
-api.get("/assets", (req, res) => {
+api.post("/test", (req, res) => {
+  return res.status(200).json({ message: "connected" });
+});
+
+api.post("/assets", (req, res) => {
   const data = req.body;
 
   // The data is quite large so the endpoint requires user to send a start and end e.g. images 10 - 20 (start - end)
@@ -84,12 +88,22 @@ api.get("/assets", (req, res) => {
   }
 
   query =
-    "SELECT * FROM Asset WHERE Asset.Asset_ID >= ${data.start} LIMIT ${data.end};";
+    "SELECT * FROM Asset WHERE Asset.Asset_ID >= " +
+    data.start +
+    " LIMIT " +
+    data.end +
+    ";";
 
   // Big Brain Query
   if (data.id) {
     query =
-      "SELECT * FROM Asset WHERE Asset.Asset_ID >= ${data.start} AND Asset.Asset_ID NOT IN ( SELECT Personal_Assets.Asset_ID FROM Personal_Assets WHERE Personal_Assets.Account_ID = ${data.id} ) LIMIT ${data.end};";
+      "SELECT * FROM Asset WHERE Asset.Asset_ID >= " +
+      data.start +
+      " AND Asset.Asset_ID NOT IN ( SELECT Personal_Assets.Asset_ID FROM Personal_Assets WHERE Personal_Assets.Account_ID = " +
+      data.id +
+      " ) LIMIT " +
+      data.end +
+      ";";
   }
 
   return con.query(query, function (err, result, fields) {
@@ -105,21 +119,11 @@ api.get("/assets", (req, res) => {
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    //check if user_data.password and Password match
-    if (user_data.password !== result[0].Password) {
-      // Passwords don't match
-      // Return a JSON response with an authentication error
-      return res.status(401).json({ error: "Authentication failed" });
-    }
-
-    // Return a JSON response with an authentication success
-    delete result[0].Password;
-
-    return res.status(200).json({ user: result[0] });
+    return res.status(200).json({ data: result });
   });
 });
 
-api.listen(8000, "0.0.0.0", () => {});
+api.listen(3001, "0.0.0.0", () => {});
 
 // const init = async () => {
 //   try {
