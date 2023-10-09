@@ -124,6 +124,13 @@ api.get("/assets/:id", (req, res) => {
   });
 });
 
+/**
+ * To Do -
+ * 
+ * add filter's and sorting as requirements in the body
+ * add search filtering as requirments in the body
+ * add sorting by different settings as requirement in the body 
+ * */ 
 api.post("/assets", (req, res) => {
   const data = req.body;
 
