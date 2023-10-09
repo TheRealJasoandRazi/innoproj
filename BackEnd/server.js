@@ -24,15 +24,7 @@ con.connect(function (err) {
 api.use(cors());
 api.use(bodyParser.json());
 
-/**
- *
- * API routes -
- *
- * authenticate user - user login
- * get assets data from sql db
- * facilitate a transaction
- *
- * **/
+
 
 api.post("/auth", (req, res) => {
   const user_data = req.body;
@@ -77,6 +69,59 @@ api.post("/auth", (req, res) => {
 
 api.post("/test", (req, res) => {
   return res.status(200).json({ message: "connected" });
+});
+
+api.get("/assets/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  //check if id exists in db
+  id_exists = con.query(
+    "SELECT * FROM Asset WHERE Assset_ID = " + id + ";",
+    function (err, result, fields) {
+      if (err) {
+        console.error(err);
+        // Return a 500 server-side error
+        return "Internal Server Error";
+      }
+
+      if (result.length === 0) {
+        // Database return no results
+        // Return a 500 server-side error
+        return "ID Doesn't Exist";
+      }
+
+      return "ID Exists";
+    }
+  );
+
+  if (id_exists === "Internal Server Error") {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+
+  if (id_exists === "ID Doesn't Exist") {
+    return res.status(404).json({ error: "ID not found" });
+  }
+
+  query =
+    "SELECT Asset.*, Account.Account_ID, Account.Username, Account.Wallet_Address FROM Asset JOIN Personal_Assets ON Personal_Assets.Asset_ID = Asset.Asset_ID JOIN Account ON Personal_Assets.Account_ID = Account.Account_ID WHERE Asset.Asset_ID = " +
+    id +
+    ";";
+
+  return con.query(query, function (err, result, fields) {
+    if (err) {
+      console.error(err);
+      // Return a JSON response with a 500 server-side error
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    if (result.length === 0) {
+      // Database return no results
+      // Return a JSON response with a 500 server-side error
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    return res.status(200).json({ data: result });
+  });
 });
 
 api.post("/assets", (req, res) => {
