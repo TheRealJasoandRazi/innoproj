@@ -4,14 +4,27 @@ const bodyParser = require("body-parser");
 const { Web3 } = require("web3");
 const mysql = require("mysql");
 const TransactionStorage = require("./build/contracts/TransactionStorage.json");
-const networkId = await web3.eth.net.getId();
-const deployedNetwork = TransactionStorage.networks[networkId];
-const contract = new web3.eth.Contract(
-  TransactionStorage.abi,
-  deployedNetwork.address
-);
 
-const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
+let contract;
+async function initializeContract() {
+  const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
+  const networkId = await web3.eth.net.getId(); // Wait for network ID to resolve
+  const deployedNetwork = TransactionStorage.networks[networkId];
+
+  if (!deployedNetwork) {
+    throw new Error("Contract is not deployed on the current network");
+  }
+
+  contract = new web3.eth.Contract(
+    TransactionStorage.abi,
+    deployedNetwork.address
+  );
+
+  // Now you can work with the 'contract' instance.
+  console.log("Contract initialized");
+}
+
+initializeContract();
 
 const api = express();
 
@@ -44,8 +57,8 @@ api.post("/create-transaction", (req, res) => {});
 /***
  * retrives all the transactions for a particular wallet address
  * */
-api.get("/transactions", (req, res) => {
-  const wallet = req.body;
+api.post("/transactions", (req, res) => {
+  const wallet = req.body.wallet;
 
   return contract.methods
     .getTransactionsByWallet(wallet)
