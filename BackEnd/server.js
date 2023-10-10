@@ -35,6 +35,21 @@ api.use(bodyParser.json());
  * */
 api.post("/create-transaction", (req, res) => {});
 
+/***
+ * Retrives all the 
+ * */ 
+api.get("/transactions", (req, res) => {});
+
+/***
+ * asset should be a svg as no other file types are supported
+ * asset should contain all required details for generation of metadata
+ * asset price and rarity will be calculated in endpoint 
+ * ownership will go to whoever uploadeds the asset 
+ * calculated price should not go over user's existing wallet balance  
+ * if all details are obtained then asset will be added to storage and db
+ * */ 
+api.post("/new-asset", (req, res) => {});
+
 api.post("/new-user", (req, res) => {
   const user_data = req.body;
 
@@ -255,7 +270,6 @@ api.get("/assets/:id", (req, res) => {
 
 /**
  * To Do -
- *
  * add filter's and sorting as requirements in the body
  * add search filtering as requirments in the body
  * add sorting by different settings as requirement in the body

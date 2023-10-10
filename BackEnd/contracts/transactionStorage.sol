@@ -51,25 +51,73 @@ contract TransactionStorage {
         return transactions.length;
     }
 
+    function getTransactions() public view returns (Transaction[] memory) {
+        return transactions;
+    }
+
     // Function to get transaction details by index
-    function getTransaction(
+    function getTransactionByIndex(
         uint256 index
     ) public view returns (Transaction memory) {
+        Transaction memory defualt = Transaction(
+            address(0),
+            address(0),
+            0,
+            0,
+            0,
+            0
+        );
+
         if (transactions.length == 0) {
             // No transactions exist, return a message
-            return Transaction(address(0), address(0), 0, 0, 0, 0);
+            return defualt;
         }
 
         if (index > transactions.length) {
             // No transactions exist, return a message
-            return Transaction(address(0), address(0), 0, 0, 0, 0);
+            return defualt;
         }
 
         if (index < 0) {
             // No transactions exist, return a message
-            return Transaction(address(0), address(0), 0, 0, 0, 0);
+            return defualt;
         }
 
         return transactions[index];
+    }
+
+    // Function to get all transactions involving a specific wallet address
+    function getTransactionsByWallet(
+        address wallet
+    ) public view returns (Transaction[] memory) {
+        uint256 count = 0;
+        uint256 length = transactions.length;
+
+        // Count the number of relevant transactions involving the specified wallet
+        for (uint256 i = 0; i < length; i++) {
+            if (
+                transactions[i].sender == wallet ||
+                transactions[i].receiver == wallet
+            ) {
+                count++;
+            }
+        }
+
+        // Create an array to hold the relevant transactions
+        Transaction[] memory result = new Transaction[](count);
+        uint256 currentIndex = 0;
+
+        // Populate the result array with relevant transactions
+        for (uint256 i = 0; i < length; i++) {
+            if (
+                transactions[i].sender == wallet ||
+                transactions[i].receiver == wallet
+            ) {
+                result[currentIndex] = transactions[i];
+                currentIndex++;
+            }
+        }
+
+        return result;
     }
 }
