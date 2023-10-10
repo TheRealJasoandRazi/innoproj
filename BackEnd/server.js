@@ -58,6 +58,7 @@ api.post("/auth", (req, res) => {
       }
 
       // Return a JSON response with an authentication success
+      // Delete password from result to main integrity of security
       delete result[0].Password;
 
       return res.status(200).json({ user: result[0] });
