@@ -28,9 +28,7 @@
 //     console.error("Error:", error);
 //   });
 
-fetch(`http://192.168.160.133:3001/assets/1000`, {
-  method: "GET",
-})
+fetch("http://127.0.0.1:4000/assets/2000")
   .then((response) => response.json())
   .then((data) => {
     console.log(data);

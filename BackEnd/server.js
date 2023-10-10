@@ -24,8 +24,6 @@ con.connect(function (err) {
 api.use(cors());
 api.use(bodyParser.json());
 
-
-
 api.post("/auth", (req, res) => {
   const user_data = req.body;
 
@@ -126,35 +124,35 @@ api.get("/assets/:id", (req, res) => {
 
 /**
  * To Do -
- * 
+ *
  * add filter's and sorting as requirements in the body
  * add search filtering as requirments in the body
- * add sorting by different settings as requirement in the body 
- * */ 
+ * add sorting by different settings as requirement in the body
+ * */
 api.post("/assets", (req, res) => {
   const data = req.body;
 
-  // The data is quite large so the endpoint requires user to send a start and end e.g. images 10 - 20 (start - end)
-  if (!data.start || !data.end) {
-    return res.status(400).json({ error: "start and end are required" });
+  // The data is quite large so the endpoint requires user to send a startIndex and count e.g. images 10 - 20 (startIndex - count)
+  if (!data.startIndex || !data.count) {
+    return res.status(400).json({ error: "startIndex and count are required" });
   }
 
   query =
     "SELECT * FROM Asset WHERE Asset.Asset_ID >= " +
-    data.start +
+    data.startIndex +
     " LIMIT " +
-    data.end +
+    data.count +
     ";";
 
   // Big Brain Query
   if (data.id) {
     query =
       "SELECT * FROM Asset WHERE Asset.Asset_ID >= " +
-      data.start +
+      data.startIndex +
       " AND Asset.Asset_ID NOT IN ( SELECT Personal_Assets.Asset_ID FROM Personal_Assets WHERE Personal_Assets.Account_ID = " +
       data.id +
       " ) LIMIT " +
-      data.end +
+      data.count +
       ";";
   }
 
@@ -175,7 +173,7 @@ api.post("/assets", (req, res) => {
   });
 });
 
-api.listen(3001, "0.0.0.0", () => {});
+api.listen(4000, "0.0.0.0", () => {});
 
 // const init = async () => {
 //   try {
