@@ -42,6 +42,63 @@ con.connect(function (err) {
 api.use(cors());
 api.use(bodyParser.json());
 
+api.get("/balance/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  userid_exists = con.query(
+    "SELECT * FROM Account WHERE Account_ID = '" + id + "';",
+    function (err, result, fields) {
+      if (err) {
+        console.error(err);
+        // Return a JSON response with a 500 server-side error
+        return 500;
+      }
+
+      if (result.length === 0) {
+        // User exists in the database
+        // Return 422 user already exists
+        return 404;
+      }
+
+      return 200;
+    }
+  );
+
+  if (userid_exists === 500) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+  if (userid_exists === 404) {
+    res.status(404).json({ error: "User not found" });
+  }
+
+  const wallet_add = con.query(
+    "SELECT * FROM Account WHERE Account_ID = " + id + ";",
+    function (err, result, fields) {
+      if (err || result.length === 0) {
+        if (err) {
+          console.error(err);
+        }
+        // Return a JSON response with a 500 server-side error
+        return 500;
+      }
+
+      return result[0].Wallet_Address;
+    }
+  );
+
+  if (wallet_add === 500) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+
+  const Balance = async () => {
+    return await web3.eth.getBalance(wallet_add);
+  };
+
+  return res
+    .status(200)
+    .json({ message: Balance });
+});
+
 /***
  * should check if the wallet addresses of the payee and payable are correct
  * should check if the payee is in possesion of the asset
