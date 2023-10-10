@@ -20,7 +20,6 @@ async function initializeContract() {
     deployedNetwork.address
   );
 
-  // Now you can work with the 'contract' instance.
   console.log("Contract initialized");
 }
 
