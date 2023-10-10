@@ -28,6 +28,29 @@ import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const MarketPlace = () => {
+  const [inputValue, setInputValue] = useState('');
+
+  const updateInputValue = (evt) => 
+  { 
+    const input = evt.target.value;
+    setInputValue(input);
+
+    fetch('http://127.0.0.1:4000/InputValueTest', 
+    {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+      body: JSON.stringify({ inputValue }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          console.error(`HTTP error! Status: ${response.status}`);
+        }
+        console.log(response.json());
+      })
+  };
+
   const StyledMenu = styled((props) => (
     <Menu
       elevation={0}
@@ -145,6 +168,8 @@ const MarketPlace = () => {
                   Search
                 </InputLabel>
                 <OutlinedInput
+                  value={inputValue}
+                  onChange={(evt) => updateInputValue(evt)}
                   id="outlined-adornment-amount"
                   endAdornment={
                     <IconButton sx={{ borderRadius: "0" }}>
