@@ -4,10 +4,10 @@ const bodyParser = require("body-parser");
 const { Web3 } = require("web3");
 const mysql = require("mysql");
 const TransactionStorage = require("./build/contracts/TransactionStorage.json");
+const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
 
 let contract;
 async function initializeContract() {
-  const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
   const networkId = await web3.eth.net.getId(); // Wait for network ID to resolve
   const deployedNetwork = TransactionStorage.networks[networkId];
 
@@ -46,7 +46,7 @@ api.get("/balance/:id", (req, res) => {
   const id = parseInt(req.params.id);
 
   userid_exists = con.query(
-    "SELECT * FROM Account WHERE Account_ID = '" + id + "';",
+    "SELECT * FROM Account WHERE Account_ID = " + id + ";",
     function (err, result, fields) {
       if (err) {
         console.error(err);
@@ -71,32 +71,69 @@ api.get("/balance/:id", (req, res) => {
     res.status(404).json({ error: "User not found" });
   }
 
-  const wallet_add = con.query(
-    "SELECT * FROM Account WHERE Account_ID = " + id + ";",
-    function (err, result, fields) {
-      if (err || result.length === 0) {
-        if (err) {
-          console.error(err);
-        }
-        // Return a JSON response with a 500 server-side error
-        return 500;
-      }
+  let wallet_add;
 
-      return result[0].Wallet_Address;
+  function getWalletAddress(id) {
+    return new Promise((resolve, reject) => {
+      con.query(
+        "SELECT Wallet_Address AS Address FROM Account WHERE Account_ID = " +
+          id +
+          ";",
+        function (err, result, fields) {
+          if (err || result.length === 0) {
+            if (err) {
+              console.error(err);
+            }
+            reject("Error fetching wallet address");
+          } else {
+            console.log("here");
+            resolve(result[0].Address);
+          }
+        }
+      );
+    });
+  }
+
+  // Usage example:
+  async function fetchWalletAddress(id) {
+    try {
+      const walletAddress = await getWalletAddress(id);
+      // Use the wallet address here
+      console.log(walletAddress);
+    } catch (error) {
+      // Handle the error
+      console.error("Error:", error);
     }
-  );
+  }
+
+  fetchWalletAddress(id);
 
   if (wallet_add === 500) {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 
-  const Balance = async () => {
-    return await web3.eth.getBalance(wallet_add);
-  };
+  // console.log("here");
 
-  return res
-    .status(200)
-    .json({ message: Balance });
+  async function getBalance() {
+    try {
+      const balance = await web3.eth.getBalance(wallet_add);
+      return balance;
+    } catch (error) {
+      throw error; // Handle the error as needed
+    }
+  }
+
+  async function retrieveWalletBalance(req, res) {
+    try {
+      const Balance = await getBalance();
+      res.status(200).json({ message: Balance });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  // Call the retrieveWalletBalance function when handling the API request
+  return retrieveWalletBalance(req, res);
 });
 
 /***
@@ -299,8 +336,13 @@ api.post("/auth", (req, res) => {
   );
 });
 
-api.post("/test", (req, res) => {
+api.get("/test", (req, res) => {
   return res.status(200).json({ message: "connected" });
+});
+
+api.post("/InputValueTest", (req, res) => {
+  const inputValue = req.body.inputValue;
+  return res.status(200).json({ result: inputValue });
 });
 
 api.get("/assets/:id", (req, res) => {
@@ -367,7 +409,7 @@ api.post("/assets", (req, res) => {
 
   // The data is quite large so the endpoint requires user to send a startIndex and count e.g. images 10 - 20 (startIndex - count)
   if (!data.startIndex || !data.count) {
-    return res.status(400).json({ error: "startIndex and count are required" });
+    return res.status(400).json({ error: "required params not sent" });
   }
 
   query =
