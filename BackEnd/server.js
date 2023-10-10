@@ -4,6 +4,12 @@ const bodyParser = require("body-parser");
 const { Web3 } = require("web3");
 const mysql = require("mysql");
 const TransactionStorage = require("./build/contracts/TransactionStorage.json");
+const networkId = await web3.eth.net.getId();
+const deployedNetwork = TransactionStorage.networks[networkId];
+const contract = new web3.eth.Contract(
+  TransactionStorage.abi,
+  deployedNetwork.address
+);
 
 const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
 
@@ -36,18 +42,31 @@ api.use(bodyParser.json());
 api.post("/create-transaction", (req, res) => {});
 
 /***
- * Retrives all the 
- * */ 
-api.get("/transactions", (req, res) => {});
+ * retrives all the transactions for a particular wallet address
+ * */
+api.get("/transactions", (req, res) => {
+  const wallet = req.body;
+
+  return contract.methods
+    .getTransactionsByWallet(wallet)
+    .call()
+    .then((transactions) => {
+      return res.status(200).json({ message: JSON.stringify(transactions) });
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    });
+});
 
 /***
  * asset should be a svg as no other file types are supported
  * asset should contain all required details for generation of metadata
- * asset price and rarity will be calculated in endpoint 
- * ownership will go to whoever uploadeds the asset 
- * calculated price should not go over user's existing wallet balance  
+ * asset price and rarity will be calculated in endpoint
+ * ownership will go to whoever uploadeds the asset
+ * calculated price should not go over user's existing wallet balance
  * if all details are obtained then asset will be added to storage and db
- * */ 
+ * */
 api.post("/new-asset", (req, res) => {});
 
 api.post("/new-user", (req, res) => {
@@ -319,47 +338,3 @@ api.post("/assets", (req, res) => {
 });
 
 api.listen(4000, "0.0.0.0", () => {});
-
-// const init = async () => {
-//   try {
-//     const accounts = await web3.eth.getAccounts();
-//     const networkId = await web3.eth.net.getId();
-
-//     const senderAddress = "0x7b8aBbC11db9FA05984F9B5Fb30E7fc7BB25Cb80";
-//     const receiverAddress = "0x7b3F63964A2B1C7Cda2f2fc9f0B2D1edC21a839B";
-
-//     if (!TransactionStorage.networks[networkId]) {
-//       throw new Error("Contract not deployed on the current network.");
-//     }
-
-//     const deployedNetwork = TransactionStorage.networks[networkId];
-//     const contractInstance = new web3.eth.Contract(
-//       TransactionStorage.abi,
-//       deployedNetwork.address
-//     );
-
-//     // Specify the gas limit (e.g., 2 million gas units)
-//     const gasLimit = 2000000;
-
-//     // Example: Add a new transaction with a higher gas limit
-//     await contractInstance.methods
-//       .addTransaction(receiverAddress, 10)
-//       .send({ from: senderAddress, gas: gasLimit });
-
-//     // Example: Retrieve transaction count and details
-//     const transactionCount = await contractInstance.methods
-//       .getTransactionCount()
-//       .call();
-//     console.log(`Transaction Count: ${transactionCount}`);
-
-//     const transactionIndex = 0; // Change this to the desired index
-//     const transaction = await contractInstance.methods
-//       .getTransaction(transactionIndex)
-//       .call();
-//     console.log(`Transaction Details:`, transaction);
-//   } catch (error) {
-//     console.error("Error:", error);
-//   }
-// };
-
-// init();
