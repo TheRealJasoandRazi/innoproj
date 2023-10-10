@@ -24,6 +24,136 @@ con.connect(function (err) {
 api.use(cors());
 api.use(bodyParser.json());
 
+/***
+ * should check if the wallet addresses of the payee and payable are correct
+ * should check if the payee is in possesion of the asset
+ * should run the transaction and check for proper response
+ *  if there are errors they should be handled appropriatly
+ *  if no errors and transaction was successfully recorded
+ *    then asset should be moved from payees account to payables account in the db
+ * endpoint should then send success response
+ * */
+api.post("/create-transaction", (req, res) => {});
+
+api.post("/new-user", (req, res) => {
+  const user_data = req.body;
+
+  // Check if "usr_nme", "pwd", "wallet_add" and "prvt_key" exists
+  if (
+    !user_data.usr_nme ||
+    !user_data.pwd ||
+    !user_data.wallet_add ||
+    !user_data.prvt_key
+  ) {
+    return res.status(400).json({ error: "Missing information" });
+  }
+
+  if (user_data.usr_nme.length >= 4) {
+    return res
+      .status(402)
+      .json({ error: "Username is not alteast 4 characters" });
+  }
+
+  user_exists = con.query(
+    "SELECT * FROM Account WHERE Username = '" + user_data.usr_nme + "';",
+    function (err, result, fields) {
+      if (err) {
+        console.error(err);
+        // Return a JSON response with a 500 server-side error
+        return 500;
+      }
+
+      if (result.length === 1) {
+        // User exists in the database
+        // Return 422 user already exists
+        return 422;
+      }
+
+      return 200;
+    }
+  );
+
+  if (user_exists === 500) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+  if (user_exists === 422) {
+    res.status(422).json({ error: "User already exists" });
+  }
+
+  user_id = con.query(
+    "SELECT MAX(Account_ID) AS ID FROM Account;",
+    function (err, result, fields) {
+      if (err || result.length === 0) {
+        console.error(err);
+        // Return a JSON response with a 500 server-side error
+        return 500;
+      }
+      return parseInt(result[0].ID) + 1;
+    }
+  );
+
+  if (user_id === 500) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+
+  wallet_exists = con.query(
+    "SELECT * FROM Account WHERE Wallet_Address = '" +
+      user_data.wallet_add +
+      "';",
+    function (err, result, fields) {
+      if (err) {
+        console.error(err);
+        // Return a JSON response with a 500 server-side error
+        return 500;
+      }
+
+      if (result.length === 1) {
+        // User exists in the database
+        // Return 422 wallet already used
+        return 422;
+      }
+
+      return 200;
+    }
+  );
+
+  if (wallet_exists === 500) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+  if (wallet_exists === 422) {
+    res.status(422).json({ error: "Wallet already used" });
+  }
+
+  account = web3.eth.accounts.privateKeyToAccount(privateKey);
+
+  if (user_data.wallet_add !== account.address) {
+    return res
+      .status(401)
+      .json({ error: "Invalid private key. Authentication failed." });
+  }
+
+  return con.query(
+    "INSERT INTO Account(Account_ID, Username, Password, Wallet_Address) VALUES(" +
+      user_id +
+      ",'" +
+      user_data.usr_nme +
+      "', '" +
+      user_data.pwd +
+      "', '" +
+      user_data.wallet_add +
+      "');",
+    function (err, result, fields) {
+      if (err) {
+        console.error(err);
+        // Return a JSON response with a 500 server-side error
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+
+      return res.status(200).json({ message: "User created successfully" });
+    }
+  );
+});
+
 api.post("/auth", (req, res) => {
   const user_data = req.body;
 
