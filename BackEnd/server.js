@@ -104,11 +104,16 @@ api.post("/create-transaction", (req, res) => {
   const td = req.body; //Transaction Data
 });
 
-/**
- * Retrieves all the transactions for a particular wallet address.
- */
-api.post("/transactions", (req, res) => {
-  const wallet = req.body.wallet; // Extract the wallet address from the request body.
+/**************************************************************************************
+ * Params (Request Body) -
+ * - wallet: String (required) - The wallet address for which to retrieve transactions.
+
+ * Response (JSON) -
+ * - 200: OK. Returns the list of transactions as a JSON string.
+ * - 500: Internal Server Error. An error occurred during the transaction retrieval.
+ **************************************************************************************/
+api.get("/transactions/:wallet", (req, res) => {
+  const wallet = req.params.wallet; // Extract the wallet address from the request parameter.
 
   // Use the contract's 'getTransactionsByWallet' method to retrieve transactions for the specified wallet address.
   return contract.methods
