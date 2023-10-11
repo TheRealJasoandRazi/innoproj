@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const { Web3 } = require("web3");
 const mysql = require("mysql");
 const TransactionStorage = require("./build/contracts/TransactionStorage.json");
+const e = require("express");
 const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
 
 let contract;
@@ -20,7 +21,7 @@ async function initializeContract() {
     deployedNetwork.address
   );
 
-  console.log("Contract initialized");
+  console.log("Contract initialization complete!");
 }
 
 initializeContract();
@@ -36,107 +37,61 @@ var con = mysql.createConnection({
 
 con.connect(function (err) {
   if (err) throw err;
-  console.log("Connected!");
+  console.log("Database connected!");
 });
 
 api.use(cors());
 api.use(bodyParser.json());
 
-api.get("/balance/:id", (req, res) => {
-  const id = parseInt(req.params.id);
+/*************************************************************************
+ * Params (URL Parameter) -
+ * - id: Number (required) - The user's ID to retrieve the wallet balance.
 
-  userid_exists = con.query(
-    "SELECT * FROM Account WHERE Account_ID = " + id + ";",
+ * Response (JSON) -
+ * - 200: OK. Returns the user's wallet balance in Ether.
+ * - 404: Not Found. User not found with the given ID.
+ * - 500: Internal Server Error. Database query or Ethereum call failed.
+ *************************************************************************/
+api.get("/balance/:id", (req, res) => {
+  const id = parseInt(req.params.id); // Extract the user ID from the request parameters.
+
+  // Query the database to retrieve the user's wallet address based on the user ID.
+  con.query(
+    `SELECT Wallet_Address AS Wallet FROM Account WHERE Account_ID = ${id};`,
     function (err, result, fields) {
       if (err) {
-        console.error(err);
-        // Return a JSON response with a 500 server-side error
-        return 500;
-      }
+        // If there's an error with the database query, respond with a 500 Internal Server Error.
+        res.status(500).json({ error: "Internal Server Error" });
+      } else if (result.length === 0) {
+        // If no user is found with the given ID, respond with a 404 Not Found.
+        res.status(404).json({ error: "User not found" });
+      } else {
+        // User exists in the database. Now, retrieve the wallet balance.
 
-      if (result.length === 0) {
-        // User exists in the database
-        // Return 422 user already exists
-        return 404;
-      }
+        web3.eth
+          .getBalance(result[0].Wallet)
+          .then((balance) => {
+            // Convert the balance from Wei to Ether.
+            const balanceInEther = web3.utils.fromWei(balance, "ether");
 
-      return 200;
+            // Respond with a 200 OK status and the user's wallet balance in Ether.
+            res.status(200).json({ Balance: balanceInEther + " ETH" });
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+          });
+      }
     }
   );
 
-  if (userid_exists === 500) {
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-  if (userid_exists === 404) {
-    res.status(404).json({ error: "User not found" });
-  }
-
-  let wallet_add;
-
-  function getWalletAddress(id) {
-    return new Promise((resolve, reject) => {
-      con.query(
-        "SELECT Wallet_Address AS Address FROM Account WHERE Account_ID = " +
-          id +
-          ";",
-        function (err, result, fields) {
-          if (err || result.length === 0) {
-            if (err) {
-              console.error(err);
-            }
-            reject("Error fetching wallet address");
-          } else {
-            console.log("here");
-            resolve(result[0].Address);
-          }
-        }
-      );
-    });
-  }
-
-  // Usage example:
-  async function fetchWalletAddress(id) {
-    try {
-      const walletAddress = await getWalletAddress(id);
-      // Use the wallet address here
-      console.log(walletAddress);
-    } catch (error) {
-      // Handle the error
-      console.error("Error:", error);
-    }
-  }
-
-  fetchWalletAddress(id);
-
-  if (wallet_add === 500) {
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-
-  // console.log("here");
-
-  async function getBalance() {
-    try {
-      const balance = await web3.eth.getBalance(wallet_add);
-      return balance;
-    } catch (error) {
-      throw error; // Handle the error as needed
-    }
-  }
-
-  async function retrieveWalletBalance(req, res) {
-    try {
-      const Balance = await getBalance();
-      res.status(200).json({ message: Balance });
-    } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
-    }
-  }
-
-  // Call the retrieveWalletBalance function when handling the API request
-  return retrieveWalletBalance(req, res);
+  // Return the response.
+  return res;
 });
 
 /***
+ * Params Required - BID, SID, Assets[], Amount
+ *
  * should check if the wallet addresses of the payee and payable are correct
  * should check if the payee is in possesion of the asset
  * should run the transaction and check for proper response
@@ -145,35 +100,32 @@ api.get("/balance/:id", (req, res) => {
  *    then asset should be moved from payees account to payables account in the db
  * endpoint should then send success response
  * */
-api.post("/create-transaction", (req, res) => {});
+api.post("/create-transaction", (req, res) => {
+  const td = req.body; //Transaction Data
+});
 
-/***
- * retrives all the transactions for a particular wallet address
- * */
+/**
+ * Retrieves all the transactions for a particular wallet address.
+ */
 api.post("/transactions", (req, res) => {
-  const wallet = req.body.wallet;
+  const wallet = req.body.wallet; // Extract the wallet address from the request body.
 
+  // Use the contract's 'getTransactionsByWallet' method to retrieve transactions for the specified wallet address.
   return contract.methods
     .getTransactionsByWallet(wallet)
     .call()
     .then((transactions) => {
+      // Respond with a 200 OK status and the list of transactions as a JSON string.
       return res.status(200).json({ message: JSON.stringify(transactions) });
     })
     .catch((error) => {
+      // Handle any errors that occur during the transaction retrieval.
       console.error("Error:", error);
+
+      // Respond with a 500 Internal Server Error status and an error message.
       return res.status(500).json({ error: "Internal Server Error" });
     });
 });
-
-/***
- * asset should be a svg as no other file types are supported
- * asset should contain all required details for generation of metadata
- * asset price and rarity will be calculated in endpoint
- * ownership will go to whoever uploadeds the asset
- * calculated price should not go over user's existing wallet balance
- * if all details are obtained then asset will be added to storage and db
- * */
-api.post("/new-asset", (req, res) => {});
 
 api.post("/new-user", (req, res) => {
   const user_data = req.body;
@@ -194,106 +146,92 @@ api.post("/new-user", (req, res) => {
       .json({ error: "Username is not alteast 4 characters" });
   }
 
-  user_exists = con.query(
-    "SELECT * FROM Account WHERE Username = '" + user_data.usr_nme + "';",
+  con.query(
+    `SELECT * FROM Account WHERE Username = ${user_data.usr_nme};`,
     function (err, result, fields) {
       if (err) {
         console.error(err);
         // Return a JSON response with a 500 server-side error
-        return 500;
-      }
-
-      if (result.length === 1) {
+        res.status(500).json({ error: "Internal Server Error" });
+      } else if (result.length === 1) {
         // User exists in the database
         // Return 422 user already exists
-        return 422;
-      }
+        res.status(422).json({ error: "User already exists" });
+      } else {
+        con.query(
+          "SELECT MAX(Account_ID) AS ID FROM Account;",
+          function (err, result, fields) {
+            if (err || result.length === 0) {
+              console.error(err);
+              // Return a JSON response with a 500 server-side error
+              res.status(500).json({ error: "Internal Server Error" });
+            } else {
+              const user_id = parseInt(result[0].ID) + 1;
 
-      return 200;
+              con.query(
+                `SELECT * FROM Account WHERE Wallet_Address = ${user_data.wallet_add};`,
+                function (err, result, fields) {
+                  if (err) {
+                    console.error(err);
+                    // Return a JSON response with a 500 server-side error
+                    res.status(500).json({ error: "Internal Server Error" });
+                  } else if (result.length === 1) {
+                    // wallet already used in the database
+                    // Return 422 wallet already used
+                    res.status(422).json({ error: "Wallet already used" });
+                  } else {
+                    web3.eth.accounts
+                      .privateKeyToAccount(privateKey)
+                      .then((account) => {
+                        if (user_data.wallet_add !== account.address) {
+                          res.status(401).json({
+                            error:
+                              "Invalid private key. Authentication failed.",
+                          });
+                        } else {
+                          con.query(
+                            `INSERT INTO Account(Account_ID, Username, Password, Wallet_Address) VALUES (${user_id}, '${user_data.usr_nme}', '${user_data.pwd}', '${user_data.wallet_add}');`,
+                            function (err, result, fields) {
+                              if (err) {
+                                console.error(err);
+                                // Return a JSON response with a 500 server-side error
+                                res
+                                  .status(500)
+                                  .json({ error: "Internal Server Error" });
+                              } else {
+                                res.status(200).json({
+                                  message: "User created successfully",
+                                });
+                              }
+                            }
+                          );
+                        }
+                      });
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
     }
   );
 
-  if (user_exists === 500) {
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-  if (user_exists === 422) {
-    res.status(422).json({ error: "User already exists" });
-  }
-
-  user_id = con.query(
-    "SELECT MAX(Account_ID) AS ID FROM Account;",
-    function (err, result, fields) {
-      if (err || result.length === 0) {
-        console.error(err);
-        // Return a JSON response with a 500 server-side error
-        return 500;
-      }
-      return parseInt(result[0].ID) + 1;
-    }
-  );
-
-  if (user_id === 500) {
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-
-  wallet_exists = con.query(
-    "SELECT * FROM Account WHERE Wallet_Address = '" +
-      user_data.wallet_add +
-      "';",
-    function (err, result, fields) {
-      if (err) {
-        console.error(err);
-        // Return a JSON response with a 500 server-side error
-        return 500;
-      }
-
-      if (result.length === 1) {
-        // User exists in the database
-        // Return 422 wallet already used
-        return 422;
-      }
-
-      return 200;
-    }
-  );
-
-  if (wallet_exists === 500) {
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-  if (wallet_exists === 422) {
-    res.status(422).json({ error: "Wallet already used" });
-  }
-
-  account = web3.eth.accounts.privateKeyToAccount(privateKey);
-
-  if (user_data.wallet_add !== account.address) {
-    return res
-      .status(401)
-      .json({ error: "Invalid private key. Authentication failed." });
-  }
-
-  return con.query(
-    "INSERT INTO Account(Account_ID, Username, Password, Wallet_Address) VALUES(" +
-      user_id +
-      ",'" +
-      user_data.usr_nme +
-      "', '" +
-      user_data.pwd +
-      "', '" +
-      user_data.wallet_add +
-      "');",
-    function (err, result, fields) {
-      if (err) {
-        console.error(err);
-        // Return a JSON response with a 500 server-side error
-        return res.status(500).json({ error: "Internal Server Error" });
-      }
-
-      return res.status(200).json({ message: "User created successfully" });
-    }
-  );
+  return res;
 });
 
+/*************************************************************
+ * Params (Request Body) -
+ * - username: String (required) - The username of the user.
+ * - password: String (required) - The user's password.
+ *
+ * Response (JSON) -
+ * - 200: Authentication successful. Returns user information.
+ * - 400: Bad request if required fields are missing.
+ * - 401: Unauthorized if the password doesn't match.
+ * - 404: User not found if the user doesn't exist.
+ * - 500: Internal server error for other issues.
+ *************************************************************/
 api.post("/auth", (req, res) => {
   const user_data = req.body;
 
@@ -306,7 +244,7 @@ api.post("/auth", (req, res) => {
 
   //Check if user exists
   return con.query(
-    "SELECT * FROM Account WHERE Username = '" + user_data.username + "';",
+    `SELECT * FROM Account WHERE Username = '${user_data.username}';`,
     function (err, result, fields) {
       if (err) {
         console.error(err);
@@ -340,17 +278,21 @@ api.get("/test", (req, res) => {
   return res.status(200).json({ message: "connected" });
 });
 
-api.post("/InputValueTest", (req, res) => {
-  const inputValue = req.body.inputValue;
-  return res.status(200).json({ result: inputValue });
-});
-
+/******************************************************
+ * Params (URL Parameter) -
+ * - id: Number (required) - The asset ID to retrieve.
+ *
+ * Response (JSON) -
+ * - 200: Returns asset information if the ID exists.
+ * - 404: ID not found if the ID doesn't exist.
+ * - 500: Internal server error for other issues.
+ *****************************************************/
 api.get("/assets/:id", (req, res) => {
   const id = parseInt(req.params.id);
 
   //check if id exists in db
   id_exists = con.query(
-    "SELECT * FROM Asset WHERE Assset_ID = " + id + ";",
+    `SELECT * FROM Asset WHERE Assset_ID = ${id};`,
     function (err, result, fields) {
       if (err) {
         console.error(err);
@@ -376,10 +318,7 @@ api.get("/assets/:id", (req, res) => {
     return res.status(404).json({ error: "ID not found" });
   }
 
-  query =
-    "SELECT Asset.*, Account.Account_ID, Account.Username, Account.Wallet_Address FROM Asset JOIN Personal_Assets ON Personal_Assets.Asset_ID = Asset.Asset_ID JOIN Account ON Personal_Assets.Account_ID = Account.Account_ID WHERE Asset.Asset_ID = " +
-    id +
-    ";";
+  query = `SELECT Asset.*, Account.Account_ID, Account.Username, Account.Wallet_Address FROM Asset JOIN Personal_Assets ON Personal_Assets.Asset_ID = Asset.Asset_ID JOIN Account ON Personal_Assets.Account_ID = Account.Account_ID WHERE Asset.Asset_ID = ${id} ;`;
 
   return con.query(query, function (err, result, fields) {
     if (err) {
@@ -398,54 +337,108 @@ api.get("/assets/:id", (req, res) => {
   });
 });
 
-/**
- * To Do -
- * add filter's and sorting as requirements in the body
- * add search filtering as requirments in the body
- * add sorting by different settings as requirement in the body
- * */
+/*****************************************************************************************
+ * Params -
+ * - startIndex: Number (required) - The starting index to retrieve assets.
+ * - count: Number (required) - The number of assets to retrieve.
+ * - sortPrice: String (required) - Sorting order for price ('a' for ascending, 'd' for descending).
+ * - sortRarity: String (required) - Sorting order for rarity ('a' for ascending, 'd' for descending).
+ * - id: Number - User ID for filtering assets not owned by the user.
+ * - keywords: Array of Strings - Keywords for filtering assets.
+ * - background: String - Category filter for background.
+ * - ears: String - Category filter for ears.
+ * - eye: String - Category filter for eye.
+ * - hair: String - Category filter for hair.
+ * - head: String - Category filter for head.
+ * - mouth: String - Category filter for mouth.
+ * - nose: String - Category filter for nose.
+ ********************************************************************************************/
 api.post("/assets", (req, res) => {
   const data = req.body;
 
   // The data is quite large so the endpoint requires user to send a startIndex and count e.g. images 10 - 20 (startIndex - count)
-  if (!data.startIndex || !data.count) {
+  if (!data.startIndex || !data.count || !data.sortPrice || !data.sortRarity) {
     return res.status(400).json({ error: "required params not sent" });
   }
 
-  query =
-    "SELECT * FROM Asset WHERE Asset.Asset_ID >= " +
-    data.startIndex +
-    " LIMIT " +
-    data.count +
-    ";";
-
-  // Big Brain Query
-  if (data.id) {
-    query =
-      "SELECT * FROM Asset WHERE Asset.Asset_ID >= " +
-      data.startIndex +
-      " AND Asset.Asset_ID NOT IN ( SELECT Personal_Assets.Asset_ID FROM Personal_Assets WHERE Personal_Assets.Account_ID = " +
-      data.id +
-      " ) LIMIT " +
-      data.count +
-      ";";
+  if (
+    !(
+      (data.sortPrice === "a" || data.sortPrice === "d") &&
+      (data.sortRarity === "a" || data.sortRarity === "d")
+    )
+  ) {
+    return res
+      .status(415)
+      .json({ error: "Sorting params are to be in the format of 'a' or 'd'." });
   }
 
-  return con.query(query, function (err, result, fields) {
+  let fil_id = ""; //User ID filter
+
+  let fil_keys = ""; //Search by keywords
+
+  let fil_ctgrs = ""; //Filter by categories
+
+  let sort = ` ORDER BY Rarity ${
+    data.sortRarity === "a" ? "ASC" : "DESC"
+  }, Price ${data.sortPrice === "a" ? "ASC" : "DESC"} `;
+
+  if (data.id) {
+    fil_id = ` AND Asset_ID NOT IN (SELECT Asset_ID FROM Personal_Assets WHERE Account_ID = ${data.id}) `;
+  }
+
+  if (data.keywords) {
+    if (!Array.isArray(data.keywords)) {
+      return res.status(400).json({ error: "Keywords must be a collection" });
+    }
+    data.keywords.map((keyword) => {
+      fil_keys += ` AND Keywords LIKE '%${keyword}%' `;
+    });
+  }
+
+  // Applying category filters
+  if (data.background) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.background}%' `;
+  }
+  if (data.ears) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.ears}%' `;
+  }
+  if (data.eye) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.eye}%' `;
+  }
+  if (data.hair) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.hair}%' `;
+  }
+  if (data.head) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.head}%' `;
+  }
+  if (data.mouth) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.mouth}%' `;
+  }
+  if (data.nose) {
+    fil_ctgrs += ` AND Keywords LIKE '%${data.nose}%' `;
+  }
+
+  let query = `SELECT * FROM Asset WHERE Asset_ID >= ${data.startIndex} ${fil_id} ${fil_keys} ${fil_ctgrs} ${sort} LIMIT ${data.count};`;
+
+  con.query(query, function (err, result, fields) {
     if (err) {
-      console.error(err);
+      console.error("Error :", err);
       // Return a JSON response with a 500 server-side error
-      return res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({ error: "Internal Server Error" });
     }
 
     if (result.length === 0) {
       // Database return no results
       // Return a JSON response with a 500 server-side error
-      return res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({ error: "Internal Server Error" });
     }
 
-    return res.status(200).json({ data: result });
+    res.status(200).json({ data: result });
   });
+
+  return res;
 });
 
-api.listen(4000, "0.0.0.0", () => {});
+api.listen(4000, "0.0.0.0", () => {
+  console.log("Server listening on 0.0.0.0:4000");
+});

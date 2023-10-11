@@ -3,12 +3,11 @@ pragma solidity ^0.8.19;
 
 contract TransactionStorage {
     struct Transaction {
-        address sender;
-        address receiver;
-        uint256 amount;
-        uint256 asset_uid;
-        uint256 timestamp;
-        uint256 gasCharge;
+        address sender; //buyer wallet address
+        address receiver; //seller wallet address
+        uint256 amount; //price to buy nft
+        uint256 asset_uid; //unique identifer of nft
+        uint256 timestamp; //timestamp of transaction
     }
 
     Transaction[] public transactions;
@@ -19,20 +18,14 @@ contract TransactionStorage {
         uint256 _amount,
         uint256 _asset_uid
     ) public payable {
-        // Calculate the gas cost
-        uint256 gasCost = tx.gasprice * gasleft();
-
-        // Calculate the net amount to be transferred
-        uint256 netAmount = _amount - gasCost;
-
         // Ensure the sender has enough Ether to cover the net amount
         require(
-            msg.sender.balance >= netAmount,
+            msg.sender.balance >= _amount,
             "Insufficient balance to cover net amount"
         );
 
         // Transfer the net amount to the receiver
-        _receiver.transfer(netAmount);
+        _receiver.transfer(_amount);
 
         // Record the transaction
         Transaction memory newTransaction = Transaction({
@@ -40,8 +33,7 @@ contract TransactionStorage {
             receiver: _receiver,
             amount: _amount,
             asset_uid: _asset_uid,
-            timestamp: block.timestamp,
-            gasCharge: gasCost
+            timestamp: block.timestamp
         });
         transactions.push(newTransaction);
     }
@@ -59,28 +51,15 @@ contract TransactionStorage {
     function getTransactionByIndex(
         uint256 index
     ) public view returns (Transaction memory) {
-        Transaction memory defualt = Transaction(
-            address(0),
-            address(0),
-            0,
-            0,
-            0,
-            0
-        );
+        Transaction memory t = Transaction(address(0), address(0), 0, 0, 0);
 
-        if (transactions.length == 0) {
+        if (
+            (transactions.length == 0) ||
+            (index > transactions.length) ||
+            (index < 0)
+        ) {
             // No transactions exist, return a message
-            return defualt;
-        }
-
-        if (index > transactions.length) {
-            // No transactions exist, return a message
-            return defualt;
-        }
-
-        if (index < 0) {
-            // No transactions exist, return a message
-            return defualt;
+            return t;
         }
 
         return transactions[index];
