@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const { Web3 } = require("web3");
 const mysql = require("mysql");
 const TransactionStorage = require("./build/contracts/TransactionStorage.json");
-const e = require("express");
 const web3 = new Web3("http://127.0.0.1:8545"); // Connect to a local Ethereum node
 
 let contract;
@@ -75,7 +74,7 @@ api.get("/balance/:id", (req, res) => {
             const balanceInEther = web3.utils.fromWei(balance, "ether");
 
             // Respond with a 200 OK status and the user's wallet balance in Ether.
-            res.status(200).json({ Balance: balanceInEther + " ETH" });
+            res.status(200).json({ Balance: `${balanceInEther} ETH` });
           })
           .catch((error) => {
             console.error("Error:", error);
@@ -89,19 +88,137 @@ api.get("/balance/:id", (req, res) => {
   return res;
 });
 
-/***
- * Params Required - BID, SID, Assets[], Amount
+/*************************************************************
+ * Only requires the assets and the buyer to be sent. All other data will be retrieved from the database.
+ * Assumes that the assets entered are not owned by the buyer.
+ * Will fail the transaction for all assets if the buyer cannot buy all assets in the transaction.
  *
- * should check if the wallet addresses of the payee and payable are correct
- * should check if the payee is in possesion of the asset
- * should run the transaction and check for proper response
- *  if there are errors they should be handled appropriatly
- *  if no errors and transaction was successfully recorded
- *    then asset should be moved from payees account to payables account in the db
- * endpoint should then send success response
- * */
+ * Params (Request Body) -
+ * - assets: Array (required) - An array of asset IDs to be purchased.
+ * - buyer: Number (required) - The ID of the buyer.
+ *
+ * Response (JSON) -
+ * - 200: Transactions completed successfully.
+ * - 400: Bad request if required fields are missing.
+ * - 406: Assets should be sent as a collection.
+ * - 450: Insufficient funds in the buyer's wallet.
+ * - 500: Internal server error for other issues.
+ *************************************************************/
 api.post("/create-transaction", (req, res) => {
   const td = req.body; //Transaction Data
+
+  if (!td.assets || !td.buyer) {
+    return res.status(400).json({ error: "Missing information" });
+  }
+
+  if (!Array.isArray(td.assets)) {
+    return res
+      .status(406)
+      .json({ error: "Assets should be sent in as a collection" });
+  }
+
+  con.query(
+    `SELECT Wallet_Address AS Wallet, Username FROM Account WHERE Account_ID = ${td.buyer};`,
+    function (err, result, fields) {
+      if (err || result.length === 0) {
+        console.error(err);
+        // Return a JSON response with a 500 server-side error
+        res.status(500).json({ error: "Internal Server Error" });
+      } else {
+        const buyer_wallet = result[0].Wallet;
+        const buyer_name = result[0].Username;
+
+        con.query(
+          `SELECT Account.Wallet_Address AS Wallet, Account.Account_ID AS AccID, Account.Username AS Username, Personal_Assets.Asset_ID AS ID, Asset.Price AS Price FROM Account JOIN Personal_Assets ON Account.Account_ID = Personal_Assets.Account_ID JOIN Asset ON Personal_Assets.Asset_ID = Asset.Asset_ID WHERE Personal_Assets.Asset_ID IN (${td.assets.join(
+            ", "
+          )});`,
+          function (err, result, fields) {
+            if (err || result.length === 0) {
+              console.error(err);
+              // Return a JSON response with a 500 server-side error
+              res.status(500).json({ error: "Internal Server Error" });
+            } else {
+              const seller = result.map((data) => ({
+                Wallet: data.Wallet,
+                ID: data.ID,
+                Price: data.Price,
+                AccID: data.AccID,
+                Username: data.Username
+              }));
+
+              //Calculate Total price and make sure buyer has enough funds
+              const totalPrice = seller.reduce(
+                (total, item) => total + parseFloat(item.Price),
+                0
+              );
+
+              web3.eth
+                .getBalance(buyer_wallet)
+                .then((balance) => {
+                  // Convert the balance from Wei to Ether.
+                  const balanceInEther = web3.utils.fromWei(balance, "ether");
+
+                  if (totalPrice > balanceInEther) {
+                    res
+                      .status(450)
+                      .json({ error: "Insufficient funds in wallet." });
+                  } else {
+                    seller.map((i) => {
+                      const priceWei = parseFloat(i.Price) * 1e18;
+                      contract.methods
+                        .addTransaction(
+                          i.Wallet, // _receiver (address payable)
+                          parseInt(i.ID),
+                          parseInt(i.AccID),
+                          td.buyer,
+                          i.Username,
+                          buyer_name
+                        )
+                        .send({
+                          from: buyer_wallet, // The address sending the transaction
+                          value: priceWei, // The amount to send with the transaction
+                          gas: 5000000,
+                        })
+                        .on("receipt", function (receipt) {
+                          con.query(
+                            `UPDATE Personal_Assets SET Account_ID = ${td.buyer} WHERE Asset_ID = ${i.ID};`,
+                            function (error, result, fields) {
+                              if (error) {
+                                console.error(`Error: ${error}`);
+                                res
+                                  .status(500)
+                                  .json({ error: "Internal Server Error" });
+                              }
+                            }
+                          );
+                        })
+                        .on("error", function (error) {
+                          // Transaction encountered an error
+                          console.error("Transaction error:", error);
+                          res
+                            .status(500)
+                            .json({ error: "Internal Server Error" });
+                        });
+                    });
+                    if (res.status !== 500) {
+                      res
+                        .status(200)
+                        .json({ message: "Transactions compeleted" });
+                    }
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  res.status(500).json({ error: "Internal Server Error" });
+                });
+            }
+          }
+        );
+      }
+    }
+  );
+
+  return res;
 });
 
 /**************************************************************************************
@@ -116,22 +233,60 @@ api.get("/transactions/:wallet", (req, res) => {
   const wallet = req.params.wallet; // Extract the wallet address from the request parameter.
 
   // Use the contract's 'getTransactionsByWallet' method to retrieve transactions for the specified wallet address.
-  return contract.methods
+  contract.methods
     .getTransactionsByWallet(wallet)
     .call()
     .then((transactions) => {
       // Respond with a 200 OK status and the list of transactions as a JSON string.
-      return res.status(200).json({ message: JSON.stringify(transactions) });
+
+      const Transactions = transactions.map((transaction) => {
+        // Convert asset_uid to an integer
+        const assetUid = parseInt(transaction[7]);
+
+        // Convert timestamp to a Date object
+        const timestamp = new Date(Number(transaction[8]) * 1000);
+
+        // Create and return an object with the key-value pairs
+        return {
+          sender_addr: String(transaction[0]),
+          receiver_addr: String(transaction[1]),
+          sender: parseInt(transaction[2]),
+          receiver: parseInt(transaction[3]),
+          sender_nme: String(transaction[4]),
+          receiver_nme: String(transaction[5]),
+          amount: parseFloat(transaction[6]) / 1e18,
+          asset_uid: assetUid,
+          timestamp: timestamp,
+        };
+      });
+
+      res.status(200).json({ message: Transactions });
     })
     .catch((error) => {
       // Handle any errors that occur during the transaction retrieval.
       console.error("Error:", error);
 
       // Respond with a 500 Internal Server Error status and an error message.
-      return res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({ error: "Internal Server Error" });
     });
+  return res;
 });
 
+/*************************************************************
+ * Params (Request Body) -
+ * - usr_nme: String (required) - The username of the user.
+ * - pwd: String (required) - The user's password.
+ * - wallet_add: String (required) - The user's wallet address.
+ * - prvt_key: String (required) - The user's private key.
+ *
+ * Response (JSON) -
+ * - 200: User created successfully.
+ * - 400: Bad request if required fields are missing.
+ * - 402: Username is not at least 4 characters.
+ * - 422: User already exists or wallet address already used.
+ * - 401: Unauthorized if private key authentication fails.
+ * - 500: Internal server error for other issues.
+ *************************************************************/
 api.post("/new-user", (req, res) => {
   const user_data = req.body;
 
@@ -279,6 +434,7 @@ api.post("/auth", (req, res) => {
   );
 });
 
+// Remove before final release
 api.get("/test", (req, res) => {
   return res.status(200).json({ message: "connected" });
 });
@@ -349,6 +505,7 @@ api.get("/assets/:id", (req, res) => {
  * - sortPrice: String (required) - Sorting order for price ('a' for ascending, 'd' for descending).
  * - sortRarity: String (required) - Sorting order for rarity ('a' for ascending, 'd' for descending).
  * - id: Number - User ID for filtering assets not owned by the user.
+ * - owner: Number - User ID for filtering assets owned by the user.
  * - keywords: Array of Strings - Keywords for filtering assets.
  * - background: String - Category filter for background.
  * - ears: String - Category filter for ears.
@@ -357,6 +514,12 @@ api.get("/assets/:id", (req, res) => {
  * - head: String - Category filter for head.
  * - mouth: String - Category filter for mouth.
  * - nose: String - Category filter for nose.
+ *
+ * Response (JSON) -
+ * - 200: OK. Returns the list of assets matching the criteria.
+ * - 400: Bad Request. Required parameters are missing or not in the correct format.
+ * - 415: Unsupported Media Type. Sorting parameters are not in the format of 'a' or 'd'.
+ * - 500: Internal Server Error. Database query or server-side error.
  ********************************************************************************************/
 api.post("/assets", (req, res) => {
   const data = req.body;
@@ -389,6 +552,10 @@ api.post("/assets", (req, res) => {
 
   if (data.id) {
     fil_id = ` AND Asset_ID NOT IN (SELECT Asset_ID FROM Personal_Assets WHERE Account_ID = ${data.id}) `;
+  }
+
+  if (data.owner) {
+    fil_id = `AND Asset_ID IN (SELECT Asset_ID FROM Personal_Assets WHERE Account_ID = ${data.id})`;
   }
 
   if (data.keywords) {
