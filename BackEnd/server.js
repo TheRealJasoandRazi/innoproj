@@ -57,7 +57,7 @@ api.get("/balance/:id", (req, res) => {
   // Query the database to retrieve the user's wallet address based on the user ID.
   con.query(
     `SELECT Wallet_Address AS Wallet FROM Account WHERE Account_ID = ${id};`,
-    function (err, result, fields) {
+    function (err, result) {
       if (err) {
         // If there's an error with the database query, respond with a 500 Internal Server Error.
         res.status(500).json({ error: "Internal Server Error" });
@@ -119,7 +119,7 @@ api.post("/create-transaction", (req, res) => {
 
   con.query(
     `SELECT Wallet_Address AS Wallet, Username FROM Account WHERE Account_ID = ${td.buyer};`,
-    function (err, result, fields) {
+    function (err, result) {
       if (err || result.length === 0) {
         console.error(err);
         // Return a JSON response with a 500 server-side error
@@ -132,7 +132,7 @@ api.post("/create-transaction", (req, res) => {
           `SELECT Account.Wallet_Address AS Wallet, Account.Account_ID AS AccID, Account.Username AS Username, Personal_Assets.Asset_ID AS ID, Asset.Price AS Price FROM Account JOIN Personal_Assets ON Account.Account_ID = Personal_Assets.Account_ID JOIN Asset ON Personal_Assets.Asset_ID = Asset.Asset_ID WHERE Personal_Assets.Asset_ID IN (${td.assets.join(
             ", "
           )});`,
-          function (err, result, fields) {
+          function (err, result) {
             if (err || result.length === 0) {
               console.error(err);
               // Return a JSON response with a 500 server-side error
@@ -143,7 +143,7 @@ api.post("/create-transaction", (req, res) => {
                 ID: data.ID,
                 Price: data.Price,
                 AccID: data.AccID,
-                Username: data.Username
+                Username: data.Username,
               }));
 
               //Calculate Total price and make sure buyer has enough funds
@@ -182,7 +182,7 @@ api.post("/create-transaction", (req, res) => {
                         .on("receipt", function (receipt) {
                           con.query(
                             `UPDATE Personal_Assets SET Account_ID = ${td.buyer} WHERE Asset_ID = ${i.ID};`,
-                            function (error, result, fields) {
+                            function (error, result) {
                               if (error) {
                                 console.error(`Error: ${error}`);
                                 res
@@ -308,7 +308,7 @@ api.post("/new-user", (req, res) => {
 
   con.query(
     `SELECT * FROM Account WHERE Username = ${user_data.usr_nme};`,
-    function (err, result, fields) {
+    function (err, result) {
       if (err) {
         console.error(err);
         // Return a JSON response with a 500 server-side error
@@ -320,7 +320,7 @@ api.post("/new-user", (req, res) => {
       } else {
         con.query(
           "SELECT MAX(Account_ID) AS ID FROM Account;",
-          function (err, result, fields) {
+          function (err, result) {
             if (err || result.length === 0) {
               console.error(err);
               // Return a JSON response with a 500 server-side error
@@ -330,7 +330,7 @@ api.post("/new-user", (req, res) => {
 
               con.query(
                 `SELECT * FROM Account WHERE Wallet_Address = ${user_data.wallet_add};`,
-                function (err, result, fields) {
+                function (err, result) {
                   if (err) {
                     console.error(err);
                     // Return a JSON response with a 500 server-side error
@@ -351,7 +351,7 @@ api.post("/new-user", (req, res) => {
                         } else {
                           con.query(
                             `INSERT INTO Account(Account_ID, Username, Password, Wallet_Address) VALUES (${user_id}, '${user_data.usr_nme}', '${user_data.pwd}', '${user_data.wallet_add}');`,
-                            function (err, result, fields) {
+                            function (err, result) {
                               if (err) {
                                 console.error(err);
                                 // Return a JSON response with a 500 server-side error
@@ -405,7 +405,7 @@ api.post("/auth", (req, res) => {
   //Check if user exists
   return con.query(
     `SELECT * FROM Account WHERE Username = '${user_data.username}';`,
-    function (err, result, fields) {
+    function (err, result) {
       if (err) {
         console.error(err);
         // Return a JSON response with a 500 server-side error
@@ -454,7 +454,7 @@ api.get("/assets/:id", (req, res) => {
   //check if id exists in db
   id_exists = con.query(
     `SELECT * FROM Asset WHERE Assset_ID = ${id};`,
-    function (err, result, fields) {
+    function (err, result) {
       if (err) {
         console.error(err);
         // Return a 500 server-side error
@@ -481,7 +481,7 @@ api.get("/assets/:id", (req, res) => {
 
   query = `SELECT Asset.*, Account.Account_ID, Account.Username, Account.Wallet_Address FROM Asset JOIN Personal_Assets ON Personal_Assets.Asset_ID = Asset.Asset_ID JOIN Account ON Personal_Assets.Account_ID = Account.Account_ID WHERE Asset.Asset_ID = ${id} ;`;
 
-  return con.query(query, function (err, result, fields) {
+  return con.query(query, function (err, result) {
     if (err) {
       console.error(err);
       // Return a JSON response with a 500 server-side error
@@ -590,9 +590,9 @@ api.post("/assets", (req, res) => {
     fil_ctgrs += ` AND Keywords LIKE '%${data.nose}%' `;
   }
 
-  let query = `SELECT * FROM Asset WHERE Asset_ID >= ${data.startIndex} ${fil_id} ${fil_keys} ${fil_ctgrs} ${sort} LIMIT ${data.count};`;
+  let query = `SELECT * FROM Asset WHERE Asset_ID >= ${data.startIndex} ${fil_keys} ${fil_ctgrs} ${fil_id} ${sort} LIMIT ${data.count};`;
 
-  con.query(query, function (err, result, fields) {
+  con.query(query, function (err, result) {
     if (err) {
       console.error("Error :", err);
       // Return a JSON response with a 500 server-side error
