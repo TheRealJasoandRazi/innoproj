@@ -22,10 +22,43 @@ import darkTheme from "../Themes/DarkTheme";
 import { styled, alpha } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import itemData from "../Data/ImageArray";
+//import itemData from "../Data/ImageArray";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+
+function changecolour(rarity) {
+  if(rarity < 0.2){
+    return "white";
+  } else if(rarity > 0.2 && rarity < 0.5){
+    return "blue";
+  }
+  else if(rarity > 0.5 && rarity < 0.8){
+    return "purple";
+  }
+  else if(rarity > 0.8 && rarity < 1.0){
+    return "yellow";
+  }
+}
+let itemData = [];
+function DisplayNewImages(response) {
+  itemData.splice(0, itemData.length); //deletes all elements
+  for(let i = 0; i < response.length; i++){
+    let price = response[i].Price;
+    let image = response[i].Image;
+    let rarity = response[i].Rarity;
+    let title_json = image + ".json";
+    let title = title_json.title;
+
+    let new_item = {
+      img: image,
+      title: title,
+      price: price,
+      rarity: rarity,
+    };
+    itemData.push(new_item);
+  }
+}
 
 const MarketPlace = () => {
   const [inputValue, setInputValue] = useState("");
@@ -234,6 +267,7 @@ const MarketPlace = () => {
                       sx={{
                         background:
                           "linear-gradient(to bottom, rgba(0,0,0,0.7)0%, rgba(0,0,0,0.3)70%, rgba(0,0,0,0)100%)",
+                        colour: changecolour(item.rarity),
                       }}
                       title={"$" + item.price.toLocaleString()}
                       actionIcon={
