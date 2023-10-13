@@ -10,7 +10,7 @@
 
 # production
 /build
-/public/collection
+/src/Data/NFTs/
 
 # misc
 .DS_Store

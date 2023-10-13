@@ -26,61 +26,58 @@ import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-
-function changecolour(rarity) {
-  if(rarity < 0.2){
-    return "white";
-  } else if(rarity > 0.2 && rarity < 0.5){
-    return "blue";
-  }
-  else if(rarity > 0.5 && rarity < 0.8){
-    return "purple";
-  }
-  else if(rarity > 0.8 && rarity < 1.0){
-    return "yellow";
-  }
-}
-let itemData = [];
-function DisplayNewImages(response) {
-  itemData.splice(0, itemData.length); //deletes all elements
-  for(let i = 0; i < response.length; i++){
-    let price = response[i].Price;
-    let image = response[i].Image;
-    let rarity = response[i].Rarity;
-    let title_json = image + ".json";
-    let title = title_json.title;
-
-    let new_item = {
-      img: image,
-      title: title,
-      price: price,
-      rarity: rarity,
-    };
-    itemData.push(new_item);
-  }
-}
+import { blue } from "@mui/material/colors";
 
 const MarketPlace = () => {
   const [inputValue, setInputValue] = useState("");
+  const [Images, setImages] = useState([]);
 
   const updateInputValue = (evt) => {
     const input = evt.target.value;
     setInputValue(input);
 
-    fetch("http://127.0.0.1:4000/InputValueTest", {
+    fetch("http://127.0.0.1:4000/assets", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ inputValue }),
+      body: JSON.stringify({
+        startIndex: 100,
+        count: 6,
+        id: 10001,
+        sortPrice: "a",
+        sortRarity: "d",
+        background: "green",
+        owner: "",
+      }),
     })
       .then((response) => {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
+        DisplayNewImages(data.data);
       });
   };
+
+  function changeColor(rarity) {
+    if (rarity < 0.00205) {
+      return "white";
+    } else if (rarity >= 0.00205 && rarity < 0.46656) {
+      return "blue";
+    }
+    return "purple";
+  }
+  function DisplayNewImages(imgs) {
+    let itemData = [];
+    itemData.push(
+      imgs.map((i) => {
+        const title = require(`../Data/NFTs/${i.Asset_ID}.json`).title;
+        return { ...i, title: title };
+      })
+    );
+
+    setImages(...itemData);
+  }
 
   const StyledMenu = styled((props) => (
     <Menu
@@ -252,10 +249,10 @@ const MarketPlace = () => {
                   "repeat(auto-fill, minmax(280px, 1fr))!important",
               }}
             >
-              {itemData.map((item) => (
-                <Card key={item.id}>
+              {Images.map((item) => (
+                <Card key={item.Asset_ID}>
                   <ImageListItem
-                    key={item.id}
+                    key={item.Asset_ID}
                     sx={{
                       "&:hover": {
                         border: "1px solid indigo",
@@ -267,26 +264,24 @@ const MarketPlace = () => {
                       sx={{
                         background:
                           "linear-gradient(to bottom, rgba(0,0,0,0.7)0%, rgba(0,0,0,0.3)70%, rgba(0,0,0,0)100%)",
-                        colour: changecolour(item.rarity),
                       }}
-                      title={"$" + item.price.toLocaleString()}
+                      title={`${item.Price} ETH`}
                       actionIcon={
-                        <Tooltip
-                          title={generateFakeUsername()}
-                          sx={{ mr: "5px" }}
-                        >
+                        <Tooltip title={"owner"} sx={{ mr: "5px" }}>
                           <AccountCircleIcon />
                         </Tooltip>
                       }
                       position="top"
                     />
                     <img
-                      src={`${item.img}?w=200&h=250&fit=crop&auto=format&dpr=2`}
+                      src={require(`../Data/NFTs/${item.Asset_ID}.svg`)}
+                      width={300}
+                      height={400}
                       alt={item.title}
                       loading="lazy"
                       onClick={() => {}}
                     />
-                    <ImageListItemBar title={item.title} />
+                    <ImageListItemBar title={item.title} sx={{ color: 'purple' }} />
                   </ImageListItem>
                 </Card>
               ))}
