@@ -84,6 +84,7 @@ const Transactions = () => {
           minWidth: "80vw",
           maxWidth: "90vw",
           mx: "auto",
+          px: 5
         }}
       >
         <Box sx={{ pt: "10px" }}>
