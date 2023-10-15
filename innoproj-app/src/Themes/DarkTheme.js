@@ -14,6 +14,9 @@ const darkTheme = createTheme({
     secondary: {
       main: "rgb(75, 0, 130)",
     },
+    danger: {
+      main: "red",
+    },
     // Define background colors
     background: {
       // Default background color for the entire application

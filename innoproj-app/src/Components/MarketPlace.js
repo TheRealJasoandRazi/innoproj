@@ -1,5 +1,4 @@
 import {
-  Container,
   Box,
   Typography,
   Card,
@@ -12,43 +11,51 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
-  IconButton,
-  Button,
   Stack,
-  Menu,
   MenuItem,
+  Select,
 } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
-import { styled, alpha } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-//import itemData from "../Data/ImageArray";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SearchIcon from "@mui/icons-material/Search";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { blue } from "@mui/material/colors";
+import { useUser } from "../Contexts/UserContext";
+import { useEffect } from "react";
 
 const MarketPlace = () => {
   const [inputValue, setInputValue] = useState("");
   const [Images, setImages] = useState([]);
+  const { userData } = useUser();
+  const [background, setBackground] = useState("");
+  const [head, setHead] = useState("");
+  const [eye, setEye] = useState("");
+  const [ears, setEars] = useState("");
+  const [hair, setHair] = useState("");
+  const [mouth, setMouth] = useState("");
+  const [nose, setNose] = useState("");
+  const [sortPrice, setSortPrice] = useState("a");
+  const [sortRarity, setSortRarity] = useState("d");
 
-  const updateInputValue = (evt) => {
-    const input = evt.target.value;
-    setInputValue(input);
-
+  const getImages = () => {
     fetch("http://127.0.0.1:4000/assets", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        startIndex: 100,
-        count: 6,
-        id: 10001,
-        sortPrice: "a",
-        sortRarity: "d",
-        background: "green",
-        owner: "",
+        startIndex: 1,
+        count: 100,
+        id: userData.id,
+        sortPrice: sortPrice,
+        sortRarity: sortRarity,
+        background: background,
+        head: head,
+        hair: hair,
+        eye: eye,
+        nose: nose,
+        mouth: mouth,
+        ears: ears,
+        keywords: inputValue.split(" "),
       }),
     })
       .then((response) => {
@@ -56,17 +63,29 @@ const MarketPlace = () => {
       })
       .then((data) => {
         DisplayNewImages(data.data);
+      })
+      .catch((err) => {
+        console.error(err);
       });
   };
 
+  useEffect(() => getImages(), []);
+
+  const handleSearch = (evt) => {
+    setInputValue(evt.target.value);
+
+    getImages();
+  };
+
   function changeColor(rarity) {
-    if (rarity < 0.00205) {
-      return "white";
-    } else if (rarity >= 0.00205 && rarity < 0.46656) {
+    if (rarity <= 0.04608) {
       return "blue";
+    } else if (rarity > 0.04608 && rarity <= 0.02458) {
+      return "purple";
     }
-    return "purple";
+    return "gold";
   }
+
   function DisplayNewImages(imgs) {
     let itemData = [];
     itemData.push(
@@ -75,115 +94,74 @@ const MarketPlace = () => {
         return { ...i, title: title };
       })
     );
-
     setImages(...itemData);
   }
 
-  const StyledMenu = styled((props) => (
-    <Menu
-      elevation={0}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "right",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      {...props}
-    />
-  ))(({ theme }) => ({
-    "& .MuiPaper-root": {
-      borderRadius: 6,
-      marginTop: theme.spacing(1),
-      minWidth: 180,
-      color:
-        theme.palette.mode === "light"
-          ? "rgb(55, 65, 81)"
-          : theme.palette.grey[300],
-      boxShadow:
-        "rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
-      "& .MuiMenu-list": {
-        padding: "4px 0",
-      },
-      "& .MuiMenuItem-root": {
-        "& .MuiSvgIcon-root": {
-          fontSize: 18,
-          color: theme.palette.text.secondary,
-          marginRight: theme.spacing(1.5),
-        },
-        "&:active": {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            theme.palette.action.selectedOpacity
-          ),
-        },
-      },
-    },
-  }));
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleSortPrice = (event) => {
+    setSortPrice(event.target.value);
+    getImages();
   };
 
-  // Function to generate a fake username
-  function generateFakeUsername() {
-    const adjectives = [
-      "Cool",
-      "Funny",
-      "Smart",
-      "Clever",
-      "Creative",
-      "Silly",
-      "Awesome",
-      "Happy",
-      "Gentle",
-      "Mysterious",
-    ];
-    const nouns = [
-      "Ninja",
-      "Panda",
-      "Unicorn",
-      "Wizard",
-      "Dragon",
-      "Star",
-      "Rocket",
-      "Lion",
-      "Tiger",
-      "Phoenix",
-    ];
+  const handleSortRarity = (event) => {
+    setSortRarity(event.target.value);
+    getImages();
+  };
 
-    const randomAdjective =
-      adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  const handleChangeBackground = (event) => {
+    setBackground(event.target.value);
+    getImages();
+  };
 
-    const randomNumber = Math.floor(Math.random() * 100);
+  const handleChangeHead = (event) => {
+    setHead(event.target.value);
+    getImages();
+  };
 
-    const fakeUsername = `${randomAdjective}${randomNoun}${randomNumber}`;
+  const handleChangeEye = (event) => {
+    setEye(event.target.value);
+    getImages();
+  };
 
-    return fakeUsername;
-  }
+  const handleChangeEars = (event) => {
+    setEars(event.target.value);
+    getImages();
+  };
+
+  const handleChangeNose = (event) => {
+    setNose(event.target.value);
+    getImages();
+  };
+
+  const handleChangeMouth = (event) => {
+    setMouth(event.target.value);
+    getImages();
+  };
+
+  const handleChangeHair = (event) => {
+    setHair(event.target.value);
+    getImages();
+  };
 
   const navigate = useNavigate();
 
   const handleImageClick = (item) => {
-    const encodedData = encodeURIComponent(JSON.stringify(item));
-    navigate(`/asset?param=${encodedData}`);
+    navigate(`/asset?param=${item.Asset_ID}`);
   };
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline>
-        <Container
-          fixed
+        <Box
           sx={{
             bgcolor: "#1f1f2f",
             boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
             pt: "10px",
+            minHeight: "92vh",
+            maxWidth: "90vw",
+            mx: "auto",
+            px: "1.5rem",
+            borderLeft: "4px solid black",
+            borderRight: "4px solid black",
           }}
         >
           <Box sx={{ borderBottom: "0.25rem solid indigo", pb: "0.5rem" }}>
@@ -197,56 +175,155 @@ const MarketPlace = () => {
                 </InputLabel>
                 <OutlinedInput
                   value={inputValue}
-                  onChange={(evt) => updateInputValue(evt)}
+                  onChange={(evt) => handleSearch(evt)}
                   id="outlined-adornment-amount"
-                  endAdornment={
-                    <IconButton sx={{ borderRadius: "0" }}>
-                      <SearchIcon sx={{ fill: "indigo" }} />
-                    </IconButton>
-                  }
                   label="Amount"
                   sx={{ borderColor: "indigo !important" }}
                 />
               </FormControl>
             </Stack>
-            <Box>
-              <Button
-                id="demo-customized-button"
-                aria-controls={open ? "demo-customized-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                variant="contained"
-                disableElevation
-                onClick={handleClick}
-                endIcon={<KeyboardArrowDownIcon />}
-              >
-                Sort By
-              </Button>
-              <StyledMenu
-                id="demo-customized-menu"
-                MenuListProps={{
-                  "aria-labelledby": "demo-customized-button",
-                }}
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose} disableRipple>
-                  Ascending
-                </MenuItem>
-                <MenuItem onClick={handleClose} disableRipple>
-                  Descending
-                </MenuItem>
-              </StyledMenu>
+            <Box sx={{ minWidth: 120, mt: 2 }}>
+              <Stack direction={"row"} gap={2}>
+                <form onSubmit={(e) => e.preventDefault()}>
+                  <FormControl
+                    sx={{ width: "fit-content", minWidth: "6.75vw" }}
+                  >
+                    <InputLabel id="bkc-select">Background</InputLabel>
+                    <Select
+                      labelId="bkc-select"
+                      value={background}
+                      label="Background"
+                      onChange={handleChangeBackground}
+                    >
+                      <MenuItem value={""}>&#8205;</MenuItem>
+                      <MenuItem value={"red"}>Red</MenuItem>
+                      <MenuItem value={"blue"}>Blue</MenuItem>
+                      <MenuItem value={"green"}>Green</MenuItem>
+                      <MenuItem value={"orange"}>Orange</MenuItem>
+                      <MenuItem value={"gold"}>Gold</MenuItem>
+                      <MenuItem value={"purple"}>Purple</MenuItem>
+                      <MenuItem value={"pink"}>Pink</MenuItem>
+                      <MenuItem value={"yellow"}>Yellow</MenuItem>
+                    </Select>
+                  </FormControl>
+                </form>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="hd-select">Head</InputLabel>
+                  <Select
+                    labelId="hd-select"
+                    value={head}
+                    label="Head"
+                    onChange={handleChangeHead}
+                  >
+                    <MenuItem value={""}>&#8205;</MenuItem>
+                    <MenuItem value={"handsome"}>Handsome</MenuItem>
+                    <MenuItem value={"ugly"}>Ugly</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="hir-select">Hair</InputLabel>
+                  <Select
+                    labelId="hir-select"
+                    value={hair}
+                    label="Hair"
+                    onChange={handleChangeHair}
+                  >
+                    <MenuItem value={""}>&#8205;</MenuItem>
+                    <MenuItem value={"curly"}>Curly</MenuItem>
+                    <MenuItem value={"straight"}>Straight</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="eye-select">Eye</InputLabel>
+                  <Select
+                    labelId="eye-select"
+                    value={eye}
+                    label="Eye"
+                    onChange={handleChangeEye}
+                  >
+                    <MenuItem value={""}>&#8205;</MenuItem>
+                    <MenuItem value={"angry"}>Angry</MenuItem>
+                    <MenuItem value={"normal"}>Nuetrel</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="nose-select">Nose</InputLabel>
+                  <Select
+                    labelId="nose-select"
+                    value={nose}
+                    label="Nose"
+                    onChange={handleChangeNose}
+                  >
+                    <MenuItem value={""}>&#8205;</MenuItem>
+                    <MenuItem value={"pointy"}>Pointy</MenuItem>
+                    <MenuItem value={"normal"}>Regular</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="mouth-select">Mouth</InputLabel>
+                  <Select
+                    labelId="mouth-select"
+                    value={mouth}
+                    label="Mouth"
+                    onChange={handleChangeMouth}
+                  >
+                    <MenuItem value={""}>&#8205;</MenuItem>
+                    <MenuItem value={"neutrel"}>Nuetrel</MenuItem>
+                    <MenuItem value={"sad"}>Sad</MenuItem>
+                    <MenuItem value={"sick"}>Sick</MenuItem>
+                    <MenuItem value={"smirk"}>Smirk</MenuItem>
+                    <MenuItem value={"surprised"}>Surprised</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="ears-select">Ears</InputLabel>
+                  <Select
+                    labelId="ears-select"
+                    value={ears}
+                    label="Ears"
+                    onChange={handleChangeEars}
+                  >
+                    <MenuItem value={""}>&#8205;</MenuItem>
+                    <MenuItem value={"pointy"}>Pointy</MenuItem>
+                    <MenuItem value={"regular"}>Regular</MenuItem>
+                    <MenuItem value={"round"}>Round</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl
+                  sx={{ width: "fit-content", minWidth: "6.75vw", ml: "auto" }}
+                >
+                  <InputLabel id="price-select">Sort Price</InputLabel>
+                  <Select
+                    labelId="price-select"
+                    value={sortPrice}
+                    label="Price"
+                    onChange={handleSortPrice}
+                  >
+                    <MenuItem value={"a"}>Ascending</MenuItem>
+                    <MenuItem value={"d"}>Descending</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ width: "fit-content", minWidth: "6.75vw" }}>
+                  <InputLabel id="rarity-select">Sort Rarity</InputLabel>
+                  <Select
+                    labelId="rarity-select"
+                    value={sortRarity}
+                    label="Rarity"
+                    onChange={handleSortRarity}
+                  >
+                    <MenuItem value={"a"}>Ascending</MenuItem>
+                    <MenuItem value={"d"}>Descending</MenuItem>
+                  </Select>
+                </FormControl>
+              </Stack>
             </Box>
           </Box>
           <Box>
             <ImageList
-              gap={4}
+              gap={8}
               sx={{
                 mb: 8,
-                gridTemplateColumns:
-                  "repeat(auto-fill, minmax(280px, 1fr))!important",
+                gridTemplateColumns: "1fr 1fr 1fr 1fr!important",
               }}
             >
               {Images.map((item) => (
@@ -255,17 +332,21 @@ const MarketPlace = () => {
                     key={item.Asset_ID}
                     sx={{
                       "&:hover": {
-                        border: "1px solid indigo",
+                        border: "2px solid indigo",
                       },
                     }}
+                    className="purple"
                     onClick={() => handleImageClick(item)}
                   >
                     <ImageListItemBar
                       sx={{
-                        background:
-                          "linear-gradient(to bottom, rgba(0,0,0,0.7)0%, rgba(0,0,0,0.3)70%, rgba(0,0,0,0)100%)",
+                        background: "rgba(0,0,0,0.75)",
                       }}
-                      title={`${item.Price} ETH`}
+                      title={
+                        <span className={changeColor(parseFloat(item.Rarity))}>
+                          {`${item.Price} ETH`}
+                        </span>
+                      }
                       actionIcon={
                         <Tooltip title={"owner"} sx={{ mr: "5px" }}>
                           <AccountCircleIcon />
@@ -275,19 +356,31 @@ const MarketPlace = () => {
                     />
                     <img
                       src={require(`../Data/NFTs/${item.Asset_ID}.svg`)}
-                      width={300}
-                      height={400}
                       alt={item.title}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        aspectRatio: "2.75 / 3",
+                      }}
                       loading="lazy"
                       onClick={() => {}}
                     />
-                    <ImageListItemBar title={item.title} sx={{ color: 'purple' }} />
+                    <ImageListItemBar
+                      title={
+                        <span className={changeColor(parseFloat(item.Rarity))}>
+                          {item.title}
+                        </span>
+                      }
+                      sx={{
+                        background: "black",
+                      }}
+                    />
                   </ImageListItem>
                 </Card>
               ))}
             </ImageList>
           </Box>
-        </Container>
+        </Box>
       </CssBaseline>
     </ThemeProvider>
   );

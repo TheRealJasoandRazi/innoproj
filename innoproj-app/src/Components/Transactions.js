@@ -17,78 +17,51 @@ import {
 import darkTheme from "../Themes/DarkTheme";
 import DetailsIcon from "@mui/icons-material/Details";
 import { useState } from "react";
+import { useEffect } from "react";
+import { useUser } from "../Contexts/UserContext";
 
 // Define the Transactions component
 const Transactions = () => {
-  // Function to create a data row
-  function createData(transaction, seller, buyer, asset, total) {
-    return { transaction, seller, buyer, asset, total };
-  }
-
-  // Function to generate a random string of a given length
-  function makeid(length) {
-    let result = "";
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-  }
-
-  // Function to generate a fake username
-  function generateFakeUsername() {
-    const adjectives = [
-      "Cool",
-      "Funny",
-      "Smart",
-      "Clever",
-      "Creative",
-      "Silly",
-      "Awesome",
-      "Happy",
-      "Gentle",
-      "Mysterious",
-    ];
-    const nouns = [
-      "Ninja",
-      "Panda",
-      "Unicorn",
-      "Wizard",
-      "Dragon",
-      "Star",
-      "Rocket",
-      "Lion",
-      "Tiger",
-      "Phoenix",
-    ];
-
-    const randomAdjective =
-      adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-
-    const randomNumber = Math.floor(Math.random() * 100);
-
-    const fakeUsername = `${randomAdjective}${randomNoun}${randomNumber}`;
-
-    return fakeUsername;
-  }
-  // Data for the table rows, generated using createData, makeid, and generateFakeUsername functions
-  const rows = Array.from({ length: 150 }, () =>
-    createData(
-      makeid(18),
-      generateFakeUsername(),
-      generateFakeUsername(),
-      makeid(16),
-      Math.floor(Math.random() * 10000)
-    )
-  );
-
+  const { userData } = useUser();
+  const [rows, setRows] = useState([
+    {
+      sender_addr: "",
+      receiver_addr: "",
+      sender: 0,
+      receiver: 0,
+      sender_nme: "",
+      receiver_nme: "",
+      amount: 0.0,
+      asset_uid: 0,
+      timestamp: "",
+    },
+  ]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(14);
+
+  const addTransactions = (data) => {
+    let transactions = [];
+    transactions.push(data.message.map((i) => i));
+    setRows(...transactions);
+  };
+
+  const getTransactions = () => {
+    if (userData.id !== 0) {
+      fetch(`http://127.0.0.1:4000/transactions/${userData.walletAddress}`)
+        .then((response) => {
+          if (!response.ok) {
+            console.log("server error");
+          }
+          return response.json();
+        })
+        .then((data) => addTransactions(data))
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    }
+  };
+
+  useEffect(() => getTransactions(), []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -103,12 +76,14 @@ const Transactions = () => {
     // Theme and layout setup
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Container
-        fixed
+      <Box
         sx={{
           bgcolor: "#1f1f2f",
           boxShadow: "0rem 0.0rem 5em rgba(0, 0, 0, 1)",
-          height: "100vh",
+          height: "95vh",
+          minWidth: "80vw",
+          maxWidth: "90vw",
+          mx: "auto",
         }}
       >
         <Box sx={{ pt: "10px" }}>
@@ -132,23 +107,24 @@ const Transactions = () => {
                 }}
               >
                 <TableRow>
-                  <TableCell sx={{ fontSize: "1.5rem" }}>
-                    TransactionID
-                  </TableCell>
+                  <TableCell sx={{ fontSize: "1.5rem" }}>Seller</TableCell>
                   <TableCell sx={{ fontSize: "1.5rem" }} align="right">
-                    Seller
+                    Seller's wallet
                   </TableCell>
                   <TableCell sx={{ fontSize: "1.5rem" }} align="right">
                     Buyer
                   </TableCell>
                   <TableCell sx={{ fontSize: "1.5rem" }} align="right">
+                    Buyer's Wallet
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "1.5rem" }} align="right">
                     Asset
                   </TableCell>
                   <TableCell sx={{ fontSize: "1.5rem" }} align="right">
-                    Total&nbsp;$
+                    Price
                   </TableCell>
                   <TableCell sx={{ fontSize: "1.5rem" }} align="right">
-                    Details
+                    Time & Date
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -163,26 +139,18 @@ const Transactions = () => {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (
                     <TableRow
-                      key={row.name}
+                      key={row.sender_nme}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
-                      <TableCell component="th" scope="row">
-                        {row.transaction}
-                      </TableCell>
+                      <TableCell align="right">{row.sender_nme}</TableCell>
+                      <TableCell align="right">{row.sender_addr}</TableCell>
+                      <TableCell align="right">{row.receiver_nme}</TableCell>
+                      <TableCell align="right">{row.receiver_addr}</TableCell>
                       <TableCell align="right">
-                        <a href="">u/{row.seller}</a>
+                        {require(`../Data/NFTs/${row.asset_uid}.json`).title}
                       </TableCell>
-                      <TableCell align="right">
-                        <a href="">u/{row.buyer}</a>
-                      </TableCell>
-                      <TableCell align="right">{row.asset}</TableCell>
-                      <TableCell align="right">{row.total}</TableCell>
-                      <TableCell align="right">
-                        {/* Icon button for details */}
-                        <IconButton sx={{ borderRadius: "0" }}>
-                          <DetailsIcon sx={{ fontSize: 20, fill: "indigo" }} />
-                        </IconButton>
-                      </TableCell>
+                      <TableCell align="right">{row.amount}</TableCell>
+                      <TableCell align="right">{row.timestamp}</TableCell>
                     </TableRow>
                   ))}
               </TableBody>
@@ -198,7 +166,7 @@ const Transactions = () => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Box>
-      </Container>
+      </Box>
     </ThemeProvider>
   );
 };

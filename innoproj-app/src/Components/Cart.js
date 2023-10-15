@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Box,
@@ -15,12 +15,14 @@ import {
   Button,
 } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
-import { useNavigate } from "react-router-dom";
 import { useCart } from "../Contexts/CartContext";
+import { useUser } from "../Contexts/UserContext";
 
 const Cart = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(14);
+  const { userData } = useUser();
+  const [userBalance, setUserBalance] = useState(0);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -31,7 +33,51 @@ const Cart = () => {
     setPage(0);
   };
 
-  const navigate = useNavigate();
+  const createTransaction = () => {
+    let cart_assets = [];
+    cart_assets.push(cart.items.map((i) => i.Asset_ID));
+
+    fetch(`http://192.168.160.133:4000/create-transaction`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ buyer: userData.id, assets: cart_assets }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json();
+          resetCart();
+        }
+      })
+      .then((data) => {
+        setMessage("Transaction Complete");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
+  const getWalletBalance = () => {
+    // fetch data from /balance/id
+    if (userData.id !== 0) {
+      fetch(`http://127.0.0.1:4000/balance/${userData.id}`)
+        .then((response) => {
+          if (!response.ok) {
+            console.log("server error");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setUserBalance(data.Balance);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    }
+  };
+
+  useEffect(() => getWalletBalance(), []);
 
   const [message, setMessage] = useState("");
 
@@ -56,9 +102,8 @@ const Cart = () => {
                 color="secondary"
                 sx={{ float: "right", mt: "0.5rem" }}
                 onClick={() => {
-                  setMessage("Items Bought!\tReturning To Homepage!");
-                  resetCart();
-                  // Wait for 2 seconds before returning to the homepage
+                  createTransaction();
+                  getWalletBalance();
                   setTimeout(() => {
                     window.location.href = "/";
                   }, 2000);
@@ -67,13 +112,16 @@ const Cart = () => {
                 Buy Items
               </Button>
             </Typography>
+            <Typography sx={{ mb: 2 }} variant="h6">
+              Wallet Balance - {userBalance}
+            </Typography>
 
             {/* Table */}
             <TableContainer component={Box}>
               <Table
                 sx={{ minWidth: 650 }}
                 size="small"
-                aria-label="transaction history table"
+                aria-label="Cart item table"
               >
                 {/* Table header */}
                 <TableHead
@@ -88,7 +136,7 @@ const Cart = () => {
                       Price&nbsp;$
                     </TableCell>
                     <TableCell sx={{ fontSize: "1.5rem" }} align="right">
-                      Quantity
+                      Owner
                     </TableCell>
                     <TableCell sx={{ fontSize: "1.5rem" }} align="right">
                       Total&nbsp;$
@@ -117,7 +165,7 @@ const Cart = () => {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row, index) => (
                       <TableRow
-                        key={row.name}
+                        key={index}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
@@ -127,25 +175,25 @@ const Cart = () => {
                           scope="row"
                           sx={{ fontSize: "1.2rem !important" }}
                         >
-                          {row.name.title}
+                          {require(`../Data/NFTs/${row.Asset_ID}.json`).title}
                         </TableCell>
                         <TableCell
                           align="right"
                           sx={{ fontSize: "1.2rem !important" }}
                         >
-                          {row.price.toLocaleString()}&nbsp;$
+                          {row.Price}&nbsp;ETH
                         </TableCell>
                         <TableCell
                           align="right"
                           sx={{ fontSize: "1.2rem !important" }}
                         >
-                          {row.qty}
+                          {row.Username}
                         </TableCell>
                         <TableCell
                           align="right"
                           sx={{ fontSize: "1.2rem !important" }}
                         >
-                          {(row.price * row.qty).toLocaleString()}&nbsp;$
+                          {row.Price}&nbsp;ETH
                         </TableCell>
                         <TableCell
                           align="right"
@@ -174,13 +222,13 @@ const Cart = () => {
                       align="right"
                       sx={{ fontSize: "1.2rem !important" }}
                     >
-                      {cart.quantity}
+                      Total QTY - {cart.quantity}
                     </TableCell>
                     <TableCell
                       align="right"
                       sx={{ fontSize: "1.2rem !important" }}
                     >
-                      {cart.totalPrice.toLocaleString()}&nbsp;$
+                      {cart.totalPrice}&nbsp;ETH
                     </TableCell>
                     <TableCell></TableCell>
                   </TableRow>

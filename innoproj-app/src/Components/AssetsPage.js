@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {
   ThemeProvider,
@@ -13,8 +14,6 @@ import {
   Button,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import { useCart } from "../Contexts/CartContext";
 
 const darkTheme = createTheme({
@@ -37,20 +36,62 @@ const darkTheme = createTheme({
 });
 
 const AssetsPage = () => {
+  const { addItemToCart, removeItemFromCart_ID } = useCart();
   const location = useLocation();
   const queryString = new URLSearchParams(location.search);
   const encodedData = queryString.get("param");
+  const [Image, setImage] = useState({
+    Account_ID: 0,
+    Asset_ID: 0,
+    Image: "",
+    Keywords: "",
+    Price: 0.0,
+    Rarity: 0.0,
+    Username: "",
+    Wallet_Address: "",
+  });
 
-  const { addItemToCart } = useCart();
+  const setData = (data) => {
+    setImage({
+      Account_ID: parseInt(data.data[0].Account_ID),
+      Asset_ID: parseInt(data.data[0].Asset_ID),
+      Image: data.data[0].Image,
+      Keywords: data.data[0].Keywords,
+      Price: parseFloat(data.data[0].Price),
+      Rarity: parseFloat(data.data[0].Rarity),
+      Username: data.data[0].Username,
+      Wallet_Address: data.data[0].Wallet_Address,
+    });
+  };
 
-  let decodedData = { img: "", title: "" };
+  const getImage = (ID) => {
+    fetch(`http://127.0.0.1:4000/assets/${ID}`)
+      .then((response) => response.json())
+      .then((data) => setData(data))
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
-  if (encodedData) {
-    // Decode the data and parse it back to a JavaScript object
-    decodedData = JSON.parse(decodeURIComponent(encodedData));
-  }
+  const getRarity = (rarity) => {
+    if (rarity <= 0.04608) {
+      return "Common";
+    } else if (rarity > 0.04608 && rarity <= 0.02458) {
+      return "Uncommon";
+    }
+    return "Rare";
+  };
 
-  const [itemCount, setCount] = useState(0);
+  const changeColor = (rarity) => {
+    if (rarity <= 0.04608) {
+      return "blue";
+    } else if (rarity > 0.04608 && rarity <= 0.02458) {
+      return "purple";
+    }
+    return "gold";
+  };
+
+  useEffect(() => getImage(parseInt(encodedData, 10)), []);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -68,13 +109,15 @@ const AssetsPage = () => {
               <Box
                 component="img"
                 sx={{
-                  aspectRatio: "16/9",
+                  width: "100%",
+                  height: "auto",
+                  aspectRatio: "1/1",
                   boxShadow: "0 0 2.5rem rgba(0, 0, 0, 0.75)", // Add a box shadow here
+                  border: "4px solid",
+                  borderColor: changeColor(Image.Rarity),
                 }}
-                alt={decodedData.title}
-                src={
-                  decodedData.img + "?w=250&h=350&fit=crop&auto=format&dpr=2"
-                }
+                alt={require(`../Data/NFTs/${Image.Asset_ID}.json`).title}
+                src={require(`../Data/NFTs/${Image.Asset_ID}.svg`)}
               />
             </Grid>
             <Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
@@ -86,53 +129,19 @@ const AssetsPage = () => {
                     edge="start"
                     sx={{ fontSize: 50, mr: "0.5rem" }}
                   />
-                  <Typography variant="h4">Account Name</Typography>
+                  <Typography variant="h4">{Image.Username}</Typography>
                 </IconButton>
-                <Typography variant="h4">{decodedData.title}</Typography>
-                <Typography variant="h8">
-                  Keywords: Lorem ipsum dolor sit amet consectetur adipisicing
-                  elit. Ipsum, dolor assumenda. Recusandae ab illum natus
-                  ratione obcaecati porro architecto distinctio molestiae qui
-                  rerum inventore dolore harum, minus aspernatur temporibus
-                  officiis?
+                <Typography variant="h4">
+                  {require(`../Data/NFTs/${Image.Asset_ID}.json`).title}
                 </Typography>
-                <Typography variant="h6">
-                  Price: {decodedData.price.toLocaleString()} $
+                <Typography variant="h8">Tags: {Image.Keywords}</Typography>
+                <Typography variant="h6">Price: {Image.Price} ETH</Typography>
+                <Typography
+                  variant="h6"
+                  sx={{ color: changeColor(Image.Rarity) }}
+                >
+                  Rarity: {getRarity(Image.Rarity)} Grade
                 </Typography>
-                <Stack direction={"row"} gap={0}>
-                  <IconButton
-                    onClick={() => setCount(itemCount + 1)}
-                    sx={{
-                      border: "1px solid magenta",
-                      borderRadius: "0",
-                      borderRight: "none",
-                    }}
-                  >
-                    <AddIcon sx={{ fill: "magenta" }} />
-                  </IconButton>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      border: "1px solid magenta",
-                      borderRadius: "0",
-                      p: "0.75rem",
-                      borderLeft: "none",
-                      borderRight: "none",
-                    }}
-                  >
-                    QTY: {itemCount}
-                  </Typography>
-                  <IconButton
-                    onClick={() => setCount(itemCount - 1)}
-                    sx={{
-                      border: "1px solid magenta",
-                      borderRadius: "0",
-                      borderLeft: "none",
-                    }}
-                  >
-                    <RemoveIcon sx={{ fill: "magenta" }} />
-                  </IconButton>
-                </Stack>
                 <Button
                   variant="outlined"
                   sx={{
@@ -147,17 +156,29 @@ const AssetsPage = () => {
                     },
                   }}
                   onClick={() => {
-                    // Add items to the cart using addItemToCart
-                    const item = {
-                      name: { title: decodedData.title, src: decodedData.img }, // Use imgTitle
-                      price: decodedData.price,
-                      qty: itemCount,
-                    };
-                    addItemToCart(item); // Call addItemToCart from useCart
+                    addItemToCart(Image); // Call addItemToCart from useCart
                   }}
                 >
-                  Add To Cart |{" "}
-                  {(decodedData.price * itemCount).toLocaleString()} $ |
+                  Add To Cart
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    fontSize: "1rem",
+                    width: "fit-content",
+                    p: "0.75rem",
+                    color: "magenta",
+                    borderColor: "magenta",
+                    "&:hover": {
+                      borderColor: "red",
+                      color: "red",
+                    },
+                  }}
+                  onClick={() => {
+                    removeItemFromCart_ID(Image.Asset_ID);
+                  }}
+                >
+                  Remove From Cart
                 </Button>
               </Stack>
             </Grid>

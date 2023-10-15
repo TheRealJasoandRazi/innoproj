@@ -5,6 +5,8 @@ import MarketPlace from "./Components/MarketPlace"; // Import the MarketPlace co
 import AssetsPage from "./Components/AssetsPage"; // Import the AssetsPage component
 import Transactions from "./Components/Transactions"; // Import the Transactions component
 import FAQpage from "./Components/FAQ"; // Import the FAQpage component
+import LogOut from "./Components/Logout";
+import LogIn from "./Components/Login";
 import Cart from "./Components/Cart"; // Import the Cart component
 import { Route, Routes } from "react-router-dom"; // Import Route and Routes from react-router-dom
 
@@ -28,6 +30,8 @@ function App() {
         <Route path="/transactions" element={<Transactions />} />
         {/* Render the Cart component when the URL is "/cart" */}
         <Route path="/cart" element={<Cart />} />
+        <Route path="/logout" element={<LogOut />} />
+        <Route path="/login" element={<LogIn />} />
       </Routes>
     </>
   );

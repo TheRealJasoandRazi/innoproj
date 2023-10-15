@@ -58,3 +58,15 @@ body {
 input {
   color: white !important;
 }
+
+.purple {
+  color: rgb(249, 0, 249) !important;
+}
+
+.blue {
+  color: rgb(0, 157, 255) !important;
+}
+
+.gold {
+  color: rgb(255, 242, 0) !important;
+}

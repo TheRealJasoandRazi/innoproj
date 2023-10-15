@@ -5,7 +5,6 @@ import {
   Toolbar,
   IconButton,
   Box,
-  TextField,
   ThemeProvider,
   MenuItem,
   Menu,
@@ -14,15 +13,19 @@ import {
 import { styled, alpha } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import HiveSharpIcon from "@mui/icons-material/HiveSharp";
-import SearchIcon from "@mui/icons-material/Search";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { createTheme } from "@mui/material/styles";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { useCart } from "../Contexts/CartContext";
+import { useUser } from "../Contexts/UserContext";
 
 const NavBar = () => {
+  const { userData } = useUser();
+
   // Create a custom theme
   const theme = createTheme({
     palette: {
@@ -92,6 +95,7 @@ const NavBar = () => {
   // Function to handle menu close
   const handleClose = () => {
     setAnchorEl(null);
+    console.log(userData);
   };
 
   return (
@@ -124,35 +128,12 @@ const NavBar = () => {
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
           <Stack direction="row" spacing={2}>
-            {/* Search Bar */}
-            <form>
-              <Box sx={{ pt: "0.5rem" }}>
-                <TextField
-                  id="search-bar"
-                  className="text"
-                  onInput={(e) => {
-                    console.log(e.target.value);
-                  }}
-                  label={<span>Search for an asset..</span>}
-                  variant="outlined"
-                  placeholder="Search..."
-                  size="small"
-                  color="secondary"
-                />
-                <IconButton
-                  sx={{ borderRadius: 0 }}
-                  type="submit"
-                  aria-label="search"
-                >
-                  <SearchIcon />
-                </IconButton>
-              </Box>
-            </form>
             {/* Market Place Icon */}
             <IconButton
               href="/market-place"
               aria-label="market-place"
               variant="outlined"
+              disabled={!userData.isLoggedIn}
             >
               <StorefrontIcon />
             </IconButton>
@@ -167,10 +148,11 @@ const NavBar = () => {
                 pl: "0.75rem",
                 pr: "0.75rem",
               }}
+              disabled={!userData.isLoggedIn}
             >
               <ShoppingCartIcon />
               <Typography variant="h8" sx={{ pl: "0.5rem" }}>
-                {cart.quantity}
+                {userData.isLoggedIn ? cart.quantity : ""}
               </Typography>
             </IconButton>
             {/* Profile Button */}
@@ -190,12 +172,33 @@ const NavBar = () => {
               onClose={handleClose}
             >
               <a
+                href="/login"
+                style={{ textDecoration: "none", color: "inherit" }}
+                hidden={userData.isLoggedIn}
+              >
+                <MenuItem onClick={handleClose} disableRipple>
+                  <LoginIcon />
+                  Login
+                </MenuItem>
+              </a>
+              <a
                 href="/transactions"
                 style={{ textDecoration: "none", color: "inherit" }}
+                hidden={!userData.isLoggedIn}
               >
                 <MenuItem onClick={handleClose} disableRipple>
                   <MonetizationOnIcon />
                   Transactions
+                </MenuItem>
+              </a>
+              <a
+                href="/logout"
+                style={{ textDecoration: "none", color: "inherit" }}
+                hidden={!userData.isLoggedIn}
+              >
+                <MenuItem onClick={handleClose} disableRipple>
+                  <LogoutIcon />
+                  Logout
                 </MenuItem>
               </a>
             </StyledMenu>

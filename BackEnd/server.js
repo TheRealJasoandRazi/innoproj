@@ -203,7 +203,7 @@ api.post("/create-transaction", (req, res) => {
                     if (res.status !== 500) {
                       res
                         .status(200)
-                        .json({ message: "Transactions compeleted" });
+                        .json({ message: "Transactions completed" });
                     }
                   }
                 })
@@ -434,11 +434,6 @@ api.post("/auth", (req, res) => {
   );
 });
 
-// Remove before final release
-api.get("/test", (req, res) => {
-  return res.status(200).json({ message: "connected" });
-});
-
 /******************************************************
  * Params (URL Parameter) -
  * - id: Number (required) - The asset ID to retrieve.
@@ -453,7 +448,7 @@ api.get("/assets/:id", (req, res) => {
 
   //check if id exists in db
   id_exists = con.query(
-    `SELECT * FROM Asset WHERE Assset_ID = ${id};`,
+    `SELECT * FROM Asset WHERE Asset_ID = ${id};`,
     function (err, result) {
       if (err) {
         console.error(err);
@@ -569,25 +564,39 @@ api.post("/assets", (req, res) => {
 
   // Applying category filters
   if (data.background) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.background}%' `;
+    if (data.background !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.background}%' `;
+    }
   }
   if (data.ears) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.ears}%' `;
+    if (data.ears !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.ears}%' `;
+    }
   }
   if (data.eye) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.eye}%' `;
+    if (data.eye !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.eye}%' `;
+    }
   }
   if (data.hair) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.hair}%' `;
+    if (data.hair !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.hair}%' `;
+    }
   }
   if (data.head) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.head}%' `;
+    if (data.head !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.head}%' `;
+    }
   }
   if (data.mouth) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.mouth}%' `;
+    if (data.mouth !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.mouth}%' `;
+    }
   }
   if (data.nose) {
-    fil_ctgrs += ` AND Keywords LIKE '%${data.nose}%' `;
+    if (data.nose !== "") {
+      fil_ctgrs += ` AND Keywords LIKE '%${data.nose}%' `;
+    }
   }
 
   let query = `SELECT * FROM Asset WHERE Asset_ID >= ${data.startIndex} ${fil_keys} ${fil_ctgrs} ${fil_id} ${sort} LIMIT ${data.count};`;
@@ -605,10 +614,16 @@ api.post("/assets", (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     }
 
+    // try this if err - ERR_HTTP_HEADERS_SENT and print to console
+
     res.status(200).json({ data: result });
   });
 
-  return res;
+  try {
+    return res;
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 api.listen(4000, "0.0.0.0", () => {

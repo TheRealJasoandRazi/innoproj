@@ -10,22 +10,11 @@ export function useCart() {
 
 // CartProvider component that manages the shopping cart state
 export function CartProvider({ children }) {
-  /**
-   * items array - [
-   *  {
-   *   item - name of the item|product, *In the first assignment (img, title, price)*
-   *   price - unit price of the product
-   *   qty - number of units
-   * }
-   * ....
-   * ]
-   * */
-
   // Load cart state from localStorage on initialization
   const [cart, setCart] = useState(() => {
     const savedCart = JSON.parse(localStorage.getItem("cart")) || {
       quantity: 0,
-      totalPrice: 0,
+      totalPrice: 0.0,
       items: [],
     };
     return savedCart;
@@ -33,12 +22,20 @@ export function CartProvider({ children }) {
 
   // Function to add an item to the cart
   const addItemToCart = (item) => {
-    setCart((prevCart) => ({
-      ...prevCart,
-      quantity: prevCart.quantity + item.qty,
-      totalPrice: prevCart.totalPrice + item.price * item.qty,
-      items: [...prevCart.items, item],
-    }));
+    // Check if item.Account_ID is already in the cart
+    const itemInCart = cart.items.find(
+      (cartItem) => cartItem.Asset_ID === item.Asset_ID
+    );
+
+    if (!itemInCart) {
+      // If the item is not in the cart, add it as a new item
+      setCart((prevCart) => ({
+        ...prevCart,
+        quantity: prevCart.quantity + 1,
+        totalPrice: prevCart.totalPrice + parseFloat(item.Price),
+        items: [...prevCart.items, { ...item, quantity: 1 }],
+      }));
+    }
   };
 
   // Function to remove an item from the cart by index
@@ -48,12 +45,20 @@ export function CartProvider({ children }) {
 
     setCart((prevCart) => ({
       ...prevCart,
-      quantity: prevCart.quantity - prevCart.items[index].qty,
-      totalPrice:
-        prevCart.totalPrice -
-        prevCart.items[index].price * prevCart.items[index].qty,
+      quantity: prevCart.quantity - 1,
+      totalPrice: prevCart.totalPrice - prevCart.items[index].Price,
       items: updatedItems,
     }));
+  };
+
+  const removeItemFromCart_ID = (id) => {
+    const index = cart.items.findIndex((cartItem) => cartItem.Asset_ID === id);
+
+    if (!isNaN(index)) {
+      if (index >= 0) {
+        removeItemFromCart(index);
+      }
+    }
   };
 
   // Function to reset the cart
@@ -72,7 +77,13 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ cart, addItemToCart, removeItemFromCart, resetCart }}
+      value={{
+        cart,
+        addItemToCart,
+        removeItemFromCart,
+        resetCart,
+        removeItemFromCart_ID,
+      }}
     >
       {children}
     </CartContext.Provider>

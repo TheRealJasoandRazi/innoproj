@@ -14,16 +14,94 @@ import QuizIcon from "@mui/icons-material/Quiz";
 import { useNavigate } from "react-router-dom";
 import WatchList from "./WatchList";
 import darkTheme from "../Themes/DarkTheme";
-// import itemData from "../Data/ImageArray";
-let itemData = [];
+import { useState, useEffect } from "react";
+import { useUser } from "../Contexts/UserContext";
+
 const Home = () => {
-  let userBalance = 100;
+  const [userBalance, setUserBalance] = useState(0);
   const navigate = useNavigate();
+  const { userData } = useUser();
+  const [Images, setImages] = useState([]);
 
   const handleImageClick = (item) => {
-    const encodedData = encodeURIComponent(JSON.stringify(item));
-    navigate(`/asset?param=${encodedData}`);
+    if (userData.isLoggedIn) {
+      navigate(`/asset?param=${item.Asset_ID}`);
+    }
   };
+
+  function changeColor(rarity) {
+    if (rarity <= 0.04608) {
+      return "blue";
+    } else if (rarity > 0.04608 && rarity <= 0.02458) {
+      return "purple";
+    }
+    return "gold";
+  }
+
+  const getImages = () => {
+    fetch("http://127.0.0.1:4000/assets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        startIndex: 1,
+        count: 10,
+        id: userData.id,
+        sortPrice: "d",
+        sortRarity: "a",
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        DisplayNewImages(data.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  function DisplayNewImages(imgs) {
+    let itemData = [];
+    itemData.push(
+      imgs.map((i) => {
+        const title = require(`../Data/NFTs/${i.Asset_ID}.json`).title;
+        return { ...i, title: title };
+      })
+    );
+    setImages(...itemData);
+  }
+
+  useEffect(() => {
+    const getWalletBalance = () => {
+      // fetch data from /balance/id
+      if (userData.id !== 0) {
+        fetch(`http://127.0.0.1:4000/balance/${userData.id}`)
+          .then((response) => {
+            if (!response.ok) {
+              console.log("server error");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            setUserBalance(data.Balance);
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+      }
+    };
+
+    getImages();
+    getWalletBalance();
+    // Set up the interval to run the function every 30 seconds
+    const intervalId = setInterval(getWalletBalance, 30000); // 30,000 milliseconds = 30 seconds
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []); // The empty dependency array ensures that the effect runs only once when the component mounts
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -37,7 +115,9 @@ const Home = () => {
         >
           <Box sx={{ pt: "10px" }}>
             <Box sx={{ mb: "10px", borderBottom: "2px solid white" }}>
-              <Typography variant="h6">Balance: {userBalance}$</Typography>
+              <Typography variant="h6" display={false}>
+                Balance: {userBalance}
+              </Typography>
             </Box>
             <Box sx={{ mb: "10px", borderBottom: "2px solid white" }}>
               <Typography variant="h6" sx={{ fontWeight: "bold" }}>
@@ -52,9 +132,9 @@ const Home = () => {
                   }}
                   rowHeight={400}
                 >
-                  {itemData.slice(0, 10).map((item) => (
+                  {Images.map((item) => (
                     <ImageListItem
-                      key={item.img}
+                      key={item.Asset_ID}
                       sx={{
                         flex: "0 0 auto", // Allow the item to shrink but not grow
                         maxWidth: "25%", // Set the maximum width of each item
@@ -68,25 +148,20 @@ const Home = () => {
                       onClick={() => handleImageClick(item)}
                     >
                       <img
-                        src={`${item.img}?w=200&h=250&fit=crop&auto=format&dpr=2`}
+                        src={require(`../Data/NFTs/${item.Asset_ID}.svg`)}
                         alt={item.title}
                         loading="lazy"
                         onClick={() => {}}
                       />
                       <ImageListItemBar
                         title={
-                          <span style={{ color: "white", fontWeight: "bold" }}>
+                          <span
+                            className={changeColor(parseFloat(item.Rarity))}
+                          >
                             {item.title}
                           </span>
                         }
-                        subtitle={
-                          <span style={{ color: "white", whiteSpace: "wrap" }}>
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Quaerat quis sapiente incidunt dolore dolorem
-                            officiis sunt est eius atque.
-                          </span>
-                        }
-                        sx={{ height: "35%" }}
+                        sx={{ height: "fit-content" }}
                       ></ImageListItemBar>
                     </ImageListItem>
                   ))}
