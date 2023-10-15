@@ -45,6 +45,16 @@ const Transactions = () => {
     setRows(...transactions);
   };
 
+  const convertToLocaleDateTime = (dateString) => {
+    if (dateString === "") return "";
+
+    const date = new Date(dateString);
+    const localDate = date.toLocaleDateString();
+    const localTime = date.toLocaleTimeString();
+    const localDateTime = localDate + " " + localTime;
+    return localDateTime;
+  };
+
   const getTransactions = () => {
     if (userData.id !== 0) {
       fetch(`http://127.0.0.1:4000/transactions/${userData.walletAddress}`)
@@ -84,7 +94,7 @@ const Transactions = () => {
           minWidth: "80vw",
           maxWidth: "90vw",
           mx: "auto",
-          px: 5
+          px: 5,
         }}
       >
         <Box sx={{ pt: "10px" }}>
@@ -151,7 +161,7 @@ const Transactions = () => {
                         {require(`../Data/NFTs/${row.asset_uid}.json`).title}
                       </TableCell>
                       <TableCell align="right">{row.amount}</TableCell>
-                      <TableCell align="right">{row.timestamp}</TableCell>
+                      <TableCell align="right">{convertToLocaleDateTime(row.timestamp)}</TableCell>
                     </TableRow>
                   ))}
               </TableBody>

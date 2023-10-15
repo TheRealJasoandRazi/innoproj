@@ -67,25 +67,23 @@
 //     console.error("Error:", error);
 //   });
 
-// fetch(`http://127.0.0.1:4000/assets`, {
-//   method: "POST",
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-//   body: JSON.stringify({
-//     startIndex: 100,
-//     count: 20,
-//     id: 10001,
-//     sortPrice: "a",
-//     sortRarity: "d",
-//   }),
-// })
-//   .then((response) => response.json())
-//   .then((data) => {
-//     data.data.map((i) => {
-//       console.log(i);
-//     });
-//   })
-//   .catch((error) => {
-//     console.error("Error:", error);
-//   });
+fetch(`http://127.0.0.1:4000/assets`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    startIndex: 100,
+    count: 2,
+    id: 10001,
+    sortPrice: "a",
+    sortRarity: "d",
+  }),
+})
+  .then((response) => response.json())
+  .then((data) => {
+    console.log(data)
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });

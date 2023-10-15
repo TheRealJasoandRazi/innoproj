@@ -14,6 +14,9 @@ import {
   Stack,
   MenuItem,
   Select,
+  Pagination,
+  Button,
+  Input,
 } from "@mui/material";
 import darkTheme from "../Themes/DarkTheme";
 import { useState } from "react";
@@ -24,7 +27,6 @@ import { useEffect } from "react";
 
 const MarketPlace = () => {
   const [inputValue, setInputValue] = useState("");
-  const [Images, setImages] = useState([]);
   const { userData } = useUser();
   const [background, setBackground] = useState("");
   const [head, setHead] = useState("");
@@ -44,7 +46,7 @@ const MarketPlace = () => {
       },
       body: JSON.stringify({
         startIndex: 1,
-        count: 100,
+        count: 3840,
         id: userData.id,
         sortPrice: sortPrice,
         sortRarity: sortRarity,
@@ -77,6 +79,37 @@ const MarketPlace = () => {
     getImages();
   };
 
+  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rows, setRows] = useState([
+    {
+      Asset_ID: 0,
+      Price: "",
+      Keywords: "",
+      Image: "",
+      Rarity: "",
+      title: "",
+    },
+  ]);
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+  const [page, setPage] = useState(0);
+  const [jumpToPage, setJumpToPage] = useState(1);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleJumpToPage = () => {
+    const pageNumber = parseInt(jumpToPage, 10);
+    if (pageNumber >= 1 && pageNumber <= Math.ceil(rows.length / rowsPerPage)) {
+      setPage(pageNumber - 1); // Adjust for 0-based index
+    }
+  };
+
   function changeColor(rarity) {
     if (rarity <= 0.04608) {
       return "blue";
@@ -94,7 +127,7 @@ const MarketPlace = () => {
         return { ...i, title: title };
       })
     );
-    setImages(...itemData);
+    setRows(...itemData);
   }
 
   const handleSortPrice = (event) => {
@@ -326,59 +359,86 @@ const MarketPlace = () => {
                 gridTemplateColumns: "1fr 1fr 1fr 1fr!important",
               }}
             >
-              {Images.map((item) => (
-                <Card key={item.Asset_ID}>
-                  <ImageListItem
-                    key={item.Asset_ID}
-                    sx={{
-                      "&:hover": {
-                        border: "2px solid indigo",
-                      },
-                    }}
-                    className="purple"
-                    onClick={() => handleImageClick(item)}
-                  >
-                    <ImageListItemBar
+              {rows
+                .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+                .map((item) => (
+                  <Card key={item.Asset_ID}>
+                    <ImageListItem
+                      key={item.Asset_ID}
                       sx={{
-                        background: "rgba(0,0,0,0.75)",
+                        "&:hover": {
+                          border: "2px solid indigo",
+                        },
                       }}
-                      title={
-                        <span className={changeColor(parseFloat(item.Rarity))}>
-                          {`${item.Price} ETH`}
-                        </span>
-                      }
-                      actionIcon={
-                        <Tooltip title={"owner"} sx={{ mr: "5px" }}>
-                          <AccountCircleIcon />
-                        </Tooltip>
-                      }
-                      position="top"
-                    />
-                    <img
-                      src={require(`../Data/NFTs/${item.Asset_ID}.svg`)}
-                      alt={item.title}
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        aspectRatio: "2.75 / 3",
-                      }}
-                      loading="lazy"
-                      onClick={() => {}}
-                    />
-                    <ImageListItemBar
-                      title={
-                        <span className={changeColor(parseFloat(item.Rarity))}>
-                          {item.title}
-                        </span>
-                      }
-                      sx={{
-                        background: "black",
-                      }}
-                    />
-                  </ImageListItem>
-                </Card>
-              ))}
+                      className="purple"
+                      onClick={() => handleImageClick(item)}
+                    >
+                      <ImageListItemBar
+                        sx={{
+                          background: "rgba(0,0,0,0.75)",
+                        }}
+                        title={
+                          <span
+                            className={changeColor(parseFloat(item.Rarity))}
+                          >
+                            {`${item.Price} ETH`}
+                          </span>
+                        }
+                        actionIcon={
+                          <Tooltip title={"owner"} sx={{ mr: "5px" }}>
+                            <AccountCircleIcon />
+                          </Tooltip>
+                        }
+                        position="top"
+                      />
+                      <img
+                        src={require(`../Data/NFTs/${item.Asset_ID}.svg`)}
+                        alt={item.title}
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          aspectRatio: "2.75 / 3",
+                        }}
+                        loading="lazy"
+                        onClick={() => {}}
+                      />
+                      <ImageListItemBar
+                        title={
+                          <span
+                            className={changeColor(parseFloat(item.Rarity))}
+                          >
+                            {item.title}
+                          </span>
+                        }
+                        sx={{
+                          background: "black",
+                        }}
+                      />
+                    </ImageListItem>
+                  </Card>
+                ))}
             </ImageList>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <Pagination
+                count={Math.ceil(rows.length / rowsPerPage)}
+                page={page + 1}
+                onChange={handleChangePage}
+              />
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <Input
+                type="number"
+                value={jumpToPage}
+                onChange={(e) => setJumpToPage(e.target.value)}
+                inputProps={{
+                  min: 1,
+                  max: Math.ceil(rows.length / rowsPerPage),
+                }}
+              />
+              <Button variant="outlined" onClick={handleJumpToPage}>
+                Go to Page
+              </Button>
+            </Box>
           </Box>
         </Box>
       </CssBaseline>
